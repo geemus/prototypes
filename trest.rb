@@ -168,8 +168,11 @@ module Trest
           IRB.conf[:PROMPT][:TREST][key] = "#{' ' * (@indent * 2)}#{value}"
         end
         @irb.context.prompt_mode = :TREST
-        @irb.context.workspace.instance_variable_set('@binding', block.binding)
-        @irb.eval_input rescue SystemExit
+        @irb.context.workspace = IRB::WorkSpace.new(block.binding)
+        begin
+          @irb.eval_input
+        rescue SystemExit
+        end
       when 'q'
         exit(1)
       when 't'
