@@ -155,18 +155,21 @@ module Trest
       when 'c'
         return
       when 'i'
+        print_line('Starting interactive session...')
         if @irb.nil?
           require 'irb'
           ARGV.clear # Avoid passing args to IRB
           IRB.setup(nil)
           @irb = IRB::Irb.new(nil)
           IRB.conf[:MAIN_CONTEXT] = @irb.context
+          IRB.conf[:PROMPT][:TREST] = {}
         end
-        catch(:IRB_EXIT) {
-          puts('Starting interactive session...')
-          @irb.context.workspace.instance_variable_set('@binding', block.binding)
-          @irb.eval_input
-        }
+        for key, value in IRB.conf[:PROMPT][:SIMPLE]
+          IRB.conf[:PROMPT][:TREST][key] = "#{' ' * (@indent * 2)}#{value}"
+        end
+        @irb.context.prompt_mode = :TREST
+        @irb.context.workspace.instance_variable_set('@binding', block.binding)
+        @irb.eval_input rescue SystemExit
       when 'q'
         exit(1)
       when 't'
