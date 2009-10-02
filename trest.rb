@@ -1,36 +1,12 @@
-# TODO: add tags, so you can tag tests and only run a subset
 # TODO: restart (reload files in question and restart test run? and/or rerun given test)
-# TODO: Get interactive actually working
 
 class Backtrace
+
+  attr_accessor :buffer, :max
 
   def initialize(&block)
     @max = 20
     start
-  end
-
-  def context(line_number)
-    line = @buffer[line_number]
-    
-    lines = []
-    File.open(line[:file], 'r') do |file|
-      data = file.readlines
-      min_line = [0, line[:line] - (@max / 2)].max
-      max_line  = [line[:line] + (@max / 2), data.length].min
-
-      lines << []
-      min_line.upto(line[:line] - 1) do |line_number|
-        lines[0] << "#{line_number}  #{data[line_number]}"
-      end
-
-      lines << "#{line[:line]}  #{data[line[:line]]}"
-
-      lines << []
-      (line[:line] + 1).upto(max_line) do |line_number|
-        lines[2] << "#{line_number}  #{data[line_number]}"
-      end
-    end
-    lines
   end
 
   def lines
@@ -75,13 +51,16 @@ module Trest
 
     attr_accessor :backtrace
 
-    def initialize(header, &block)
+    def initialize(header, tags = [], &block)
       @afters     = []
       @backtrace  = Backtrace.new
       @befores    = []
       @description_stack = []
+      @if_tagged     = ARGV.select {|tag| tag.match(/^[^\^]/)}
+      @unless_tagged = ARGV.select {|tag| tag.match(/^\^/)}.map {|tag| tag[1..-1]}
       @indent     = 1
       @success    = true
+      @tag_stack = []
       print("\n")
       tests(header, &block)
       print("\n")
@@ -100,8 +79,14 @@ module Trest
       @befores[-1].push(block)
     end
 
-    def description
-      @description_stack.compact.join(' ')
+    def full_description
+      "#{@description_stack.compact.join(' ')} #{full_tags}"
+    end
+
+    def full_tags
+      unless @tag_stack.flatten.empty?
+        "[#{@tag_stack.flatten.join(', ')}]"
+      end
     end
 
     def green_line(content)
@@ -113,13 +98,18 @@ module Trest
       print_line("#{@backtrace.lines[line]}: ")
       @indent += 1
       print("\n")
-      before, during, after = backtrace.context(line)
-      for line in before
-        print_line("#{line.rstrip}")
-      end
-      yellow_line("#{during.rstrip}")
-      for line in after
-        print_line("#{line.rstrip}")
+      line = @backtrace.buffer[line]
+      File.open(line[:file], 'r') do |file|
+        data = file.readlines
+        min_line = [0, line[:line] - (@backtrace.max / 2)].max
+        max_line  = [line[:line] + (@backtrace.max / 2), data.length].min
+        min_line.upto(line[:line] - 1) do |line_number|
+          print_line("#{line_number}  #{data[line_number].rstrip}")
+        end
+        yellow_line("#{line[:line]}  #{data[line[:line]].rstrip}")
+        (line[:line] + 1).upto(max_line) do |line_number|
+          print_line("#{line_number}  #{data[line_number].rstrip}")
+        end
       end
       @indent -= 2
       print("\n")
@@ -194,7 +184,7 @@ module Trest
       else
         red_line("#{choice} is not a valid choice, please try again.")
       end
-      red_line("- #{description}")
+      red_line("- #{full_description}")
       prompt(&block)
     end
 
@@ -202,8 +192,9 @@ module Trest
       print_line(content, "\e[31m")
     end
 
-    def tests(description, &block)
+    def tests(description, tags = [], &block)
       print_line(description || 'Trest.tests')
+      @tag_stack.push([*tags])
       @befores.push([])
       @afters.push([])
       @indent += 1
@@ -213,36 +204,42 @@ module Trest
       @indent -= 1
       @afters.pop
       @befores.pop
-      @description_stack.pop
+      @tag_stack.pop
     end
 
-    def test(description = nil, &block)
+    def test(description = nil, tags = [], &block)
       @description_stack.push(description)
-      if block_given?
-        for before in @befores.flatten.compact
-          before.call
+      @tag_stack.push([*tags])
+      if (@if_tagged.empty? || !(@if_tagged & @tag_stack.flatten).empty?) && (@unless_tagged.empty? || (@unless_tagged & @tag_stack.flatten).empty?)
+        if block_given?
+          for before in @befores.flatten.compact
+            before.call
+          end
+          @backtrace.start
+          success = instance_eval(&block)
+          @success = @success && success
+          @backtrace.stop
+          for after in @afters.flatten.compact
+            after.call
+          end
+        else
+          success = nil
         end
-        @backtrace.start
-        success = instance_eval(&block)
-        @success = @success && success
-        @backtrace.stop
-        for after in @afters.flatten.compact
-          after.call
+        case success
+        when false
+          red_line("- #{full_description}")
+          if STDOUT.tty?
+            prompt(&block)
+          end
+        when nil
+          yellow_line("* #{full_description}")
+        when true
+          green_line("+ #{full_description}")
         end
       else
-        success = nil
+        print_line("_ #{full_description}")
       end
-      case success
-      when false
-        red_line("- #{description}")
-        if STDOUT.tty?
-          prompt(&block)
-        end
-      when nil
-        yellow_line("* #{description}")
-      when true
-        green_line("+ #{description}")
-      end
+      @tag_stack.pop
       @description_stack.pop
     end
 
@@ -267,17 +264,16 @@ def baz
 end
 
 Trest.tests {
-  tests('true') {
+  tests('true', 'true') {
     test('should be true')      { true == true }
   }
-  test('false with backtrace') { xyzzy = 'foo'; @qux = foo; false }
+  test('false with backtrace', 'false') { xyzzy = 'foo'; @qux = foo; false }
   test('should be pending')
   tests('before') {
     before { @foo = 'bar' }
     after { @foo = 'baz' }
-    test('should setup test') { @foo == 'bar' }
+    test('should setup test', ['before', 'after']) { @foo == 'bar' }
   }
-  test('after should cleanup test') { @foo == 'baz' }
 }
 
 Trest.tests('seperate Trest.test') {
