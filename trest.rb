@@ -10,7 +10,7 @@ class Backtrace
   end
 
   def lines
-    @buffer.map {|event| "#{event[:file]}:#{event[:line]} in #{event[:method]}"}
+    @buffer.map {|event| "#{event[:file]}:#{event[:line]} #{event[:method]}"}
   end
 
   def start
@@ -19,7 +19,7 @@ class Backtrace
     Kernel.set_trace_func(
       lambda { |event, file, line, id, binding, classname|
         if event == 'call'
-          unshift({:file => file, :line => line, :method => id})
+          unshift(:file => file, :line => line, :method => "in #{id}")
         end
       }
     )
@@ -80,12 +80,12 @@ module Trest
     end
 
     def full_description
-      "#{@description_stack.compact.join(' ')} #{full_tags}"
+      "#{@description_stack.compact.join(' ')}#{full_tags}"
     end
 
     def full_tags
       unless @tag_stack.flatten.empty?
-        "[#{@tag_stack.flatten.join(', ')}]"
+        " [#{@tag_stack.flatten.join(', ')}]"
       end
     end
 
@@ -99,22 +99,27 @@ module Trest
       @indent -= 1
     end
 
+    def indentation
+      '  ' * @indent
+    end
+
     def print_backtrace_context(line)
       indent {
         print_line("#{@backtrace.lines[line]}: ")
         indent {
           print("\n")
-          line = @backtrace.buffer[line]
-          File.open(line[:file], 'r') do |file|
+          current_line = @backtrace.buffer[line]
+          File.open(current_line[:file], 'r') do |file|
             data = file.readlines
-            min_line = [0, line[:line] - (@backtrace.max / 2)].max
-            max_line  = [line[:line] + (@backtrace.max / 2), data.length].min
-            min_line.upto(line[:line] - 1) do |line_number|
-              print_line("#{line_number}  #{data[line_number].rstrip}")
+            current = current_line[:line]
+            min     = [0, current - (@backtrace.max / 2)].max
+            max     = [current + (@backtrace.max / 2), data.length].min
+            min.upto(current - 1) do |line|
+              print_line("#{line}  #{data[line].rstrip}")
             end
-            yellow_line("#{line[:line]}  #{data[line[:line]].rstrip}")
-            (line[:line] + 1).upto(max_line) do |line_number|
-              print_line("#{line_number}  #{data[line_number].rstrip}")
+            yellow_line("#{current}  #{data[current].rstrip}")
+            (current + 1).upto(max - 1) do |line|
+              print_line("#{line}  #{data[line].rstrip}")
             end
           end
         }
@@ -129,7 +134,7 @@ module Trest
         else
           index = 1
           for line in @backtrace.lines
-            print_line("#{index}  #{line}")
+            print_line("#{' ' * (2 - index.to_s.length)}#{index}  #{line}")
             index += 1
           end
         end
@@ -141,11 +146,11 @@ module Trest
       if color && STDOUT.tty?
         content = "#{color}#{content}\e[0m"
       end
-      print("#{' ' * (@indent * 2)}#{content}\n")
+      print("#{indentation}#{content}\n")
     end
 
     def prompt(&block)
-      print("#{' ' * (@indent * 2)}Action? [c,i,q,t,#,?]? ")
+      print("#{indentation}Action? [c,i,q,t,#,?]? ")
       choice = STDIN.gets.strip
       print("\n")
       case choice
@@ -162,7 +167,7 @@ module Trest
           IRB.conf[:PROMPT][:TREST] = {}
         end
         for key, value in IRB.conf[:PROMPT][:SIMPLE]
-          IRB.conf[:PROMPT][:TREST][key] = "#{' ' * (@indent * 2)}#{value}"
+          IRB.conf[:PROMPT][:TREST][key] = "#{indentation}#{value}"
         end
         @irb.context.prompt_mode = :TREST
         @irb.context.workspace = IRB::WorkSpace.new(block.binding)
@@ -214,18 +219,32 @@ module Trest
       @tag_stack.pop
     end
 
-    def test(description = nil, tags = [], &block)
+    def test(description, tags = [], &block)
       @description_stack.push(description)
       @tag_stack.push([*tags])
-      if (@if_tagged.empty? || !(@if_tagged & @tag_stack.flatten).empty?) && (@unless_tagged.empty? || (@unless_tagged & @tag_stack.flatten).empty?)
+      if (@if_tagged.empty? || !(@if_tagged & @tag_stack.flatten).empty?) &&
+          (@unless_tagged.empty? || (@unless_tagged & @tag_stack.flatten).empty?)
         if block_given?
           for before in @befores.flatten.compact
             before.call
           end
           @backtrace.start
-          success = instance_eval(&block)
+          begin
+            success = instance_eval(&block)
+            @backtrace.stop
+          rescue => error
+            success = false
+            file, line, method = error.backtrace.first.split(':')
+            if method
+              method << "in #{method[4...-1]} "
+            else
+              method = ''
+            end
+            method << "! #{error.message} (#{error.class})"
+            @backtrace.stop
+            @backtrace.unshift(:file => file, :line => line.to_i, :method => method)
+          end
           @success = @success && success
-          @backtrace.stop
           for after in @afters.flatten.compact
             after.call
           end
@@ -272,7 +291,7 @@ end
 
 Trest.tests {
   tests('true', 'true') {
-    test('should be true')      { true == true }
+    test('should be true') { true == true }
   }
   test('false with backtrace', 'false') { xyzzy = 'foo'; @qux = foo; false }
   test('should be pending')
@@ -281,8 +300,7 @@ Trest.tests {
     after { @foo = 'baz' }
     test('should setup test', ['before', 'after']) { @foo == 'bar' }
   }
-}
-
-Trest.tests('seperate Trest.test') {
-  test('instance variables from other Trest.test should be out of scope') { @foo.nil? }
+  tests('error') {
+    test('should fail test') { foo; raise StandardError.new('Something went wrong') }
+  }
 }
