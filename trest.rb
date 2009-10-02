@@ -93,40 +93,47 @@ module Trest
       print_line(content, "\e[32m")
     end
 
+    def indent(&block)
+      @indent += 1
+      yield
+      @indent -= 1
+    end
+
     def print_backtrace_context(line)
-      @indent += 1
-      print_line("#{@backtrace.lines[line]}: ")
-      @indent += 1
-      print("\n")
-      line = @backtrace.buffer[line]
-      File.open(line[:file], 'r') do |file|
-        data = file.readlines
-        min_line = [0, line[:line] - (@backtrace.max / 2)].max
-        max_line  = [line[:line] + (@backtrace.max / 2), data.length].min
-        min_line.upto(line[:line] - 1) do |line_number|
-          print_line("#{line_number}  #{data[line_number].rstrip}")
-        end
-        yellow_line("#{line[:line]}  #{data[line[:line]].rstrip}")
-        (line[:line] + 1).upto(max_line) do |line_number|
-          print_line("#{line_number}  #{data[line_number].rstrip}")
-        end
-      end
-      @indent -= 2
+      indent {
+        print_line("#{@backtrace.lines[line]}: ")
+        indent {
+          print("\n")
+          line = @backtrace.buffer[line]
+          File.open(line[:file], 'r') do |file|
+            data = file.readlines
+            min_line = [0, line[:line] - (@backtrace.max / 2)].max
+            max_line  = [line[:line] + (@backtrace.max / 2), data.length].min
+            min_line.upto(line[:line] - 1) do |line_number|
+              print_line("#{line_number}  #{data[line_number].rstrip}")
+            end
+            yellow_line("#{line[:line]}  #{data[line[:line]].rstrip}")
+            (line[:line] + 1).upto(max_line) do |line_number|
+              print_line("#{line_number}  #{data[line_number].rstrip}")
+            end
+          end
+        }
+      }
       print("\n")
     end
 
     def print_backtrace
-      @indent += 1
-      if @backtrace.lines.empty?
-        print_line('no backtrace available')
-      else
-        index = 1
-        for line in @backtrace.lines
-          print_line("#{index}  #{line}")
-          index += 1
+      indent {
+        if @backtrace.lines.empty?
+          print_line('no backtrace available')
+        else
+          index = 1
+          for line in @backtrace.lines
+            print_line("#{index}  #{line}")
+            index += 1
+          end
         end
-      end
-      @indent -= 1
+      }
       print("\n")
     end
 
@@ -197,11 +204,11 @@ module Trest
       @tag_stack.push([*tags])
       @befores.push([])
       @afters.push([])
-      @indent += 1
-      if block_given?
-        instance_eval(&block)
-      end
-      @indent -= 1
+      indent {
+        if block_given?
+          instance_eval(&block)
+        end
+      }
       @afters.pop
       @befores.pop
       @tag_stack.pop
