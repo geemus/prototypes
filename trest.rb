@@ -56,11 +56,11 @@ module Trest
       @backtrace  = Backtrace.new
       @befores    = []
       @description_stack = []
-      @if_tagged     = ARGV.select {|tag| tag.match(/^[^\^]/)}
-      @unless_tagged = ARGV.select {|tag| tag.match(/^\^/)}.map {|tag| tag[1..-1]}
+      @if_tagged      = ARGV.select {|tag| tag.match(/^[^\^]/)}
+      @unless_tagged  = ARGV.select {|tag| tag.match(/^\^/)}.map {|tag| tag[1..-1]}
       @indent     = 1
       @success    = true
-      @tag_stack = []
+      @tag_stack  = []
       print("\n")
       tests(header, &block)
       print("\n")
@@ -122,9 +122,9 @@ module Trest
               print_line("#{line}  #{data[line].rstrip}")
             end
           end
+          print("\n")
         }
       }
-      print("\n")
     end
 
     def print_backtrace
@@ -205,15 +205,15 @@ module Trest
     end
 
     def tests(description, tags = [], &block)
-      print_line(description || 'Trest.tests')
       @tag_stack.push([*tags])
       @befores.push([])
       @afters.push([])
-      indent {
-        if block_given?
-          instance_eval(&block)
-        end
-      }
+
+      print_line(description || 'Trest.tests')
+      if block_given?
+        indent { instance_eval(&block) }
+      end
+
       @afters.pop
       @befores.pop
       @tag_stack.pop
@@ -222,12 +222,15 @@ module Trest
     def test(description, tags = [], &block)
       @description_stack.push(description)
       @tag_stack.push([*tags])
+
+      # if the test includes tags and discludes ^tags, evaluate it
       if (@if_tagged.empty? || !(@if_tagged & @tag_stack.flatten).empty?) &&
           (@unless_tagged.empty? || (@unless_tagged & @tag_stack.flatten).empty?)
         if block_given?
           for before in @befores.flatten.compact
             before.call
           end
+
           @backtrace.start
           begin
             success = instance_eval(&block)
@@ -236,7 +239,7 @@ module Trest
             success = false
             file, line, method = error.backtrace.first.split(':')
             if method
-              method << "in #{method[4...-1]} "
+              method << "in #{method[4...-1]} " # get method from "in `foo'"
             else
               method = ''
             end
@@ -245,12 +248,14 @@ module Trest
             @backtrace.unshift(:file => file, :line => line.to_i, :method => method)
           end
           @success = @success && success
+
           for after in @afters.flatten.compact
             after.call
           end
         else
           success = nil
         end
+
         case success
         when false
           red_line("- #{full_description}")
@@ -265,6 +270,7 @@ module Trest
       else
         print_line("_ #{full_description}")
       end
+
       @tag_stack.pop
       @description_stack.pop
     end
