@@ -1,5 +1,4 @@
 # TODO: restart (reload files in question and restart test run? and/or rerun given test)
-# TODO: move afters to after prompt/etc so that the interactive will be before they run
 
 class Backtrace
 
@@ -241,24 +240,20 @@ module Trest
             @backtrace.unshift(:file => file, :line => line.to_i, :method => method)
           end
           @success = @success && success
+          if success
+            green_line("+ #{full_description}")
+          else
+            red_line("- #{full_description}")
+            if STDOUT.tty?
+              prompt(&block)
+            end
+          end
 
           for after in @afters.flatten.compact
             after.call
           end
         else
-          success = nil
-        end
-
-        case success
-        when false
-          red_line("- #{full_description}")
-          if STDOUT.tty?
-            prompt(&block)
-          end
-        when nil
           yellow_line("* #{full_description}")
-        when true
-          green_line("+ #{full_description}")
         end
       else
         print_line("_ #{full_description}")
