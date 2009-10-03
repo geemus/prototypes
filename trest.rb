@@ -1,4 +1,5 @@
 # TODO: restart (reload files in question and restart test run? and/or rerun given test)
+# TODO: move afters to after prompt/etc so that the interactive will be before they run
 
 class Backtrace
 
@@ -103,45 +104,6 @@ module Trest
       '  ' * @indent
     end
 
-    def print_backtrace_context(line)
-      indent {
-        print_line("#{@backtrace.lines[line]}: ")
-        indent {
-          print("\n")
-          current_line = @backtrace.buffer[line]
-          File.open(current_line[:file], 'r') do |file|
-            data = file.readlines
-            current = current_line[:line]
-            min     = [0, current - (@backtrace.max / 2)].max
-            max     = [current + (@backtrace.max / 2), data.length].min
-            min.upto(current - 1) do |line|
-              print_line("#{line}  #{data[line].rstrip}")
-            end
-            yellow_line("#{current}  #{data[current].rstrip}")
-            (current + 1).upto(max - 1) do |line|
-              print_line("#{line}  #{data[line].rstrip}")
-            end
-          end
-          print("\n")
-        }
-      }
-    end
-
-    def print_backtrace
-      indent {
-        if @backtrace.lines.empty?
-          print_line('no backtrace available')
-        else
-          index = 1
-          for line in @backtrace.lines
-            print_line("#{' ' * (2 - index.to_s.length)}#{index}  #{line}")
-            index += 1
-          end
-        end
-      }
-      print("\n")
-    end
-
     def print_line(content, color = nil)
       if color && STDOUT.tty?
         content = "#{color}#{content}\e[0m"
@@ -178,7 +140,18 @@ module Trest
       when 'q'
         exit(1)
       when 't'
-        print_backtrace
+        indent {
+          if @backtrace.lines.empty?
+            print_line('no backtrace available')
+          else
+            index = 1
+            for line in @backtrace.lines
+              print_line("#{' ' * (2 - index.to_s.length)}#{index}  #{line}")
+              index += 1
+            end
+          end
+        }
+        print("\n")
       when '?'
         print_line('c - ignore this error and continue')
         print_line('i - interactive mode')
@@ -189,7 +162,27 @@ module Trest
       when /\d/
         index = choice.to_i - 1
         if backtrace.lines[index]
-          print_backtrace_context(index)
+          indent {
+            print_line("#{@backtrace.lines[index]}: ")
+            indent {
+              print("\n")
+              current_line = @backtrace.buffer[index]
+              File.open(current_line[:file], 'r') do |file|
+                data = file.readlines
+                current = current_line[:line]
+                min     = [0, current - (@backtrace.max / 2)].max
+                max     = [current + (@backtrace.max / 2), data.length].min
+                min.upto(current - 1) do |line|
+                  print_line("#{line}  #{data[line].rstrip}")
+                end
+                yellow_line("#{current}  #{data[current].rstrip}")
+                (current + 1).upto(max - 1) do |line|
+                  print_line("#{line}  #{data[line].rstrip}")
+                end
+              end
+              print("\n")
+            }
+          }
         else
           red_line("#{choice} is not a valid backtrace line, please try again.")
         end
