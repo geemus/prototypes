@@ -16,7 +16,7 @@ module Minish
       end
     end
 
-    def method_missing(name, value = nil, &block)
+    def _(name, value = nil, &block)
       @selector_stack.push(name.to_s)
       (@styles[@selector_stack.join(' ')] ||= {}).merge!(value)
       if block_given?
@@ -37,8 +37,6 @@ module Minish
       css
     end
 
-    alias :_ :send
-
   end
 
 end
@@ -53,11 +51,11 @@ def zebra
 end
 
 p css = Minish.css {
-  ul(default_colors.merge!('font-size' => '1.5em')) {
-      li('background-color' => '#EEE')
+  _('ul', default_colors.merge!('font-size' => '1.5em')) {
+      _('li', 'background-color' => '#EEE')
       
       _('li.foo', 'color' => '#666') {
-        span(
+        _('span',
           'background-color' => '#000',
           'color' => '#CCC'
         )

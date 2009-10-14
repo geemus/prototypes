@@ -9,11 +9,11 @@ module Minish
     def initialize(&block)
       @dom_stack = [[]]
       if block_given?
-        html({}, &block)
+        _('html', {}, &block)
       end
     end
 
-    def method_missing(name, properties = {}, &block)
+    def _(name, properties = {}, &block)
       element = [name.to_s, properties]
       @dom_stack[-1].push(element)
       @dom_stack.push(element)
@@ -54,19 +54,19 @@ module Minish
 end
 
 def link_to(href, title, properties = {})
-  a(properties.merge!(:href => href)) { title }
+  _('a', properties.merge!(:href => href)) { title }
 end
 
 p html = Minish.html {
-  body {
-    div {
-      ul(:class => 'foo') {
-        li { '1' }
-        li(:class => 'bar') { '2' }
-        li(:class => 'baz') { '3' }
+  _('body') {
+    _('div') {
+      _('ul', :class => 'foo') {
+        _('li') { '1' }
+        _('li', :class => 'bar') { '2' }
+        _('li', :class => 'baz') { '3' }
       }
     }
-    span { link_to('http://0.0.0.0:4000', 'test') }
+    _('span') { link_to('http://0.0.0.0:4000', 'test') }
   }
 }
 
