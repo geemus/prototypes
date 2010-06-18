@@ -126,7 +126,7 @@ class ToHashDocument < Nokogiri::XML::SAX::Document
       else
         key, value = attributes.shift, attributes.shift
       end
-      parsed_attributes[key] = value
+      parsed_attributes[key.to_sym] = value
     end
     if @stack.last.is_a?(Array)
       @stack.last << {name.to_sym => parsed_attributes}
