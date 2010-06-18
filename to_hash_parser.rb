@@ -105,7 +105,7 @@ class ToHashDocument < Nokogiri::XML::SAX::Document
       @stack.last << {name.to_sym => parsed_attributes}
     else
       data = if @stack.empty?
-        @stack.push({name.to_sym => parsed_attributes})
+        @stack.push(parsed_attributes)
         parsed_attributes
       elsif @stack.last[name.to_sym]
         @stack.last[name.to_sym] = [@stack.last[name.to_sym]]
