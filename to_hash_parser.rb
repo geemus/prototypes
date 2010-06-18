@@ -71,6 +71,23 @@ data = <<-DATA
 </DescribeInstancesResponse>
 DATA
 
+edge = <<-EDGE
+<SupportedVersions xmlns="http://www.vmware.com/vcloud/versions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <VersionInfo>
+    <Version>v0.8a-ext2.0</Version>
+    <LoginUrl>https://services.enterprisecloud.terremark.com/api/v0.8a-ext2.0/login</LoginUrl>
+  </VersionInfo>
+  <VersionInfo>
+    <Version>v0.8b-ext2.3</Version>
+    <LoginUrl>https://services.enterprisecloud.terremark.com/api/v0.8b-ext2.3/login</LoginUrl>
+  </VersionInfo>
+  <VersionInfo>
+    <Version>v0.8</Version>
+    <LoginUrl>https://services.enterprisecloud.terremark.com/api/v0.8b-ext2.3/login</LoginUrl>
+  </VersionInfo>
+</SupportedVersions>
+EDGE
+
 class ToHashDocument < Nokogiri::XML::SAX::Document
 
   def initialize
@@ -108,7 +125,9 @@ class ToHashDocument < Nokogiri::XML::SAX::Document
         @stack.push(parsed_attributes)
         parsed_attributes
       elsif @stack.last[name.to_sym]
-        @stack.last[name.to_sym] = [@stack.last[name.to_sym]]
+        unless @stack.last[name.to_sym].is_a?(Array)
+          @stack.last[name.to_sym] = [@stack.last[name.to_sym]]
+        end
         @stack.last[name.to_sym] << parsed_attributes
         @stack.last[name.to_sym].last
       else
@@ -124,6 +143,7 @@ end
 
 document = ToHashDocument.new
 parser = Nokogiri::XML::SAX::PushParser.new(document)
-parser << data
+# parser << data
+parser << edge
 parser.finish
 pp document.response
