@@ -109,20 +109,7 @@ class ToHashDocument < Nokogiri::XML::SAX::Document
   def end_element(name)
     @stack.pop
     unless @value.empty?
-      @stack.last[name.to_sym] = case @value
-      when /^(?!0+)[0-9]*\.[0-9]+$/
-        @value.to_f
-      when /^(0|(?!0+)[0-9]*)$/
-        @value.to_i
-      when /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/
-        Time.parse(@value)
-      when /^false$/
-        false
-      when /^true$/
-        true
-      else
-        @value
-      end
+      @stack.last[name.to_sym] = @value
       @value = ''
     end
   end
