@@ -88,6 +88,12 @@ edge = <<-EDGE
 </SupportedVersions>
 EDGE
 
+attributes = <<-ATTRIBUTES
+<OrgList xmlns="http://www.vmware.com/vcloud/v0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Org href="https://services.enterprisecloud.terremark.com/api/v0.8a-ext2.0/org/1904892" type="application/vnd.vmware.vcloud.org+xml" name="Engine Yard"/>
+</OrgList>
+ATTRIBUTES
+
 class ToHashDocument < Nokogiri::XML::SAX::Document
 
   def initialize
@@ -114,9 +120,13 @@ class ToHashDocument < Nokogiri::XML::SAX::Document
   def start_element(name, attributes = [])
     @value = ''
     parsed_attributes = {}
-    for attribute in attributes
-      key, value = attribute
-      parsed_attributes[key.to_sym] = value
+    until attributes.empty?
+      if attributes.first.is_a?(Array)
+        key, value = attributes.shift
+      else
+        key, value = attributes.shift, attributes.shift
+      end
+      parsed_attributes[key] = value
     end
     if @stack.last.is_a?(Array)
       @stack.last << {name.to_sym => parsed_attributes}
@@ -132,7 +142,7 @@ class ToHashDocument < Nokogiri::XML::SAX::Document
         @stack.last[name.to_sym].last
       else
         @stack.last[name.to_sym] = {}
-        @stack.last[name.to_sym].merge(parsed_attributes)
+        @stack.last[name.to_sym].merge!(parsed_attributes)
         @stack.last[name.to_sym]
       end
       @stack.push(data)
@@ -143,7 +153,8 @@ end
 
 document = ToHashDocument.new
 parser = Nokogiri::XML::SAX::PushParser.new(document)
+parser << attributes
 # parser << data
-parser << edge
+# parser << edge
 parser.finish
 pp document.response
