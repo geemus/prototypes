@@ -1,3 +1,10 @@
+# abilities
+# character#leveling
+# building#upgrades
+# tech tree style upgrades
+# buffs/debuffs
+# hero vs unit
+
 class Model
 
   def self.attributes
