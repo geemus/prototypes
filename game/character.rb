@@ -3,7 +3,7 @@ class Model
   def self.attributes
     @attributes ||=
       if superclass.respond_to?(:attributes)
-        superclass.attributes
+        superclass.attributes.dup
       else
         []
       end
@@ -12,7 +12,7 @@ class Model
   def self.defaults
     @defaults ||= 
       if superclass.respond_to?(:defaults)
-        superclass.defaults 
+        superclass.defaults.dup
       else
         {}
       end
@@ -41,7 +41,7 @@ end
 
 class Character < Model
 
-  attribute :brawns,      :default => 2
+  attribute :brawn,       :default => 1
   attribute :brains,      :default => 1
   attribute :experience,  :default => 0
   attribute :health,      :default => 100
@@ -49,8 +49,17 @@ class Character < Model
 
 end
 
-class Warrior < Character; end
+class Warrior < Character
 
-pc = Warrior.new(:brawns => 3)
-p pc
+  attribute :brawn,       :default => 2
 
+end
+
+class Wizard < Character
+
+  attribute :brains,      :default => 2
+
+end
+
+p Warrior.new
+p Wizard.new
