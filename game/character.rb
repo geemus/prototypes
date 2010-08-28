@@ -1,5 +1,6 @@
 # abilities
 # character#leveling
+#   perhaps fib (10, 20, 30, 50... or ditto*10)
 # building#upgrades
 # tech tree style upgrades
 # buffs/debuffs
