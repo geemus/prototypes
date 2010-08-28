@@ -18,10 +18,20 @@ p @keys
 
 def lookup(value)
   key = hash_key(value)
-  target = @keys.detect {|k| k >= key}
+  first, last = 0, @keys.length
+  while first < last
+    middle = first + ((last - first) / 2)
+    if @keys[middle] < key
+      first = middle + 1
+    else
+      last = middle
+    end
+  end
+  target = @keys[last]
   p "#{key} => #{target} => #{@circle[target]}"
 end
 
 lookup('foo')
 lookup('bar')
 lookup('baz')
+lookup('server1')
