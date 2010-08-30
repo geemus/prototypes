@@ -8,6 +8,15 @@
 
 class Model
 
+  def self.abilities
+    @abilities ||=
+      if superclass.respond_to?(:abilities)
+        superclass.abilities.dup
+      else
+        {}
+      end
+  end
+
   def self.attributes
     @attributes ||=
       if superclass.respond_to?(:attributes)
@@ -15,6 +24,16 @@ class Model
       else
         {}
       end
+  end
+
+  def self.ability(name, options={})
+    class_eval <<-EOS, __FILE__, __LINE__
+      def #{name}
+        instance_eval(&self.class.abilities[:#{name}][:block])
+      end
+    EOS
+    abilities[name] ||= {}
+    abilities[name] = abilities[name].merge(options)
   end
 
   def self.attribute(name, options={})
@@ -53,6 +72,7 @@ end
 
 class Warrior < Character
 
+  ability   :yell,        :block => lambda { p 'ARGH!' }
   attribute :brawn,       :default => 2
 
 end
@@ -64,4 +84,5 @@ class Wizard < Character
 end
 
 p Warrior.new
+p Warrior.new.yell
 p Wizard.new
