@@ -1,37 +1,42 @@
 require 'digest/sha1'
 
-@circle = {}
+class Hasher
 
-def hash_key(value)
-  Digest::SHA1.hexdigest(value)[0..9]
-end
+  KEY_LENGTH = 10
+  SERVER_REPITITIONS = 100
 
-server = 'localhost'
-100.times do |index|
-  key = hash_key("server#{index}")
-  @circle[key] = server
-end
-
-@keys = @circle.keys.sort
-
-p @keys
-
-def lookup(value)
-  key = hash_key(value)
-  first, last = 0, @keys.length
-  while first < last
-    middle = first + ((last - first) / 2)
-    if @keys[middle] < key
-      first = middle + 1
-    else
-      last = middle
-    end
+  def self.hash_key(key)
+    Digest::SHA1.hexdigest(key).slice(0, Hasher::KEY_LENGTH)
   end
-  target = @keys[last]
-  p "#{key} => #{target} => #{@circle[target]}"
+
+  def initialize(servers=[])
+    @circle = {}
+    servers.each do |server|
+      SERVER_REPITITIONS.times do |index|
+        @circle[self.class.hash_key("#{server}#{index}")] = server
+      end
+    end
+    @keys = @circle.keys.sort
+  end
+
+  def lookup(key)
+    key = self.class.hash_key(key)
+    first, last = 0, @keys.length
+    while first < last
+      middle = first + ((last - first) / 2)
+      if @keys[middle] < key
+        first = middle + 1
+      else
+        last = middle
+      end
+    end
+    target = @keys[last]
+    p "#{key} => #{target} => #{@circle[target]}"
+  end
+
 end
 
-lookup('foo')
-lookup('bar')
-lookup('baz')
-lookup('server1')
+hasher = Hasher.new(['localhost'])
+
+hasher.lookup('foo')
+hasher.lookup('localhost1')
