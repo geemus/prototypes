@@ -13,15 +13,6 @@ class Model
       if superclass.respond_to?(:attributes)
         superclass.attributes.dup
       else
-        []
-      end
-  end
-
-  def self.defaults
-    @defaults ||= 
-      if superclass.respond_to?(:defaults)
-        superclass.defaults.dup
-      else
         {}
       end
   end
@@ -31,12 +22,15 @@ class Model
       attr_accessor :#{name}
       private :#{name}=
     EOS
-    attributes |= [name]
-    defaults[name] = options[:default]
+    attributes[name] ||= {}
+    attributes[name] = attributes[name].merge(options)
   end
 
   def initialize(attributes={})
-    update(self.class.defaults.merge(attributes))
+    for key, value in self.class.attributes
+      send(:"#{key}=", value[:default]) if value[:default]
+    end
+    update(attributes)
   end
 
   def update(attributes={})
