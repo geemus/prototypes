@@ -1,4 +1,4 @@
-require 'digest/sha1'
+require 'digest/md5'
 
 class Hasher
 
@@ -6,7 +6,7 @@ class Hasher
   SERVER_REPITITIONS = 100
 
   def self.hash_key(key)
-    Digest::SHA1.hexdigest(key).slice(0, Hasher::KEY_LENGTH)
+    Digest::MD5.hexdigest(key).slice(0, Hasher::KEY_LENGTH)
   end
 
   def initialize(servers=[])
