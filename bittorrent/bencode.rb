@@ -4,9 +4,17 @@ module BitTorrent
     def self.decode(string)
       case delimiter = string.slice!(0,1)
       when /\d/
-        bytes = delimiter.to_i
-        colon = string.slice!(0,1)
-        string.slice!(0, bytes)
+        string.gsub!(/^(\d*):/, '')
+        bytes = (delimiter << ($1 || '')).to_i
+        value = ''
+        bytes.times do
+          char = string.slice!(0,1)
+          value << char
+          if char == "\\"
+            value << string.slice!(0,3)
+          end
+        end
+        value
       when 'd'
         dictionary = {}
         while true
@@ -47,3 +55,6 @@ module BitTorrent
 
   end
 end
+
+data = File.open('example.torrent').read
+p BitTorrent::Bencode.decode(data)
