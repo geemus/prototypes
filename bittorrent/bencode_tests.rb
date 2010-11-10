@@ -4,6 +4,9 @@ require 'shindo'
 
 Shindo.tests('BitTorrent::Bencode', ['bencode']) do
 
+  @example_torrent_data = File.open('example.torrent').read.chomp
+  @example_torrent_hash = {"announce"=>"http://tracker.amazonaws.com:6969/announce", "info"=>{"name"=>"fog.png", "x-amz-key"=>"fog.png", "piece\nlength"=>262144, "pieces"=>"\\300\\256'\\303\\035\\221SO\\220\\266]\\321\\232_\\247\\277g\\224(\\276", "length"=>14136, "x-amz-bucket"=>"geemus"}, "announce-list"=>[["http://tracker.amazonaws.com:6969/announce"]]}
+
   tests('decode') do
 
     tests('i42e').returns(42) do
@@ -24,6 +27,10 @@ Shindo.tests('BitTorrent::Bencode', ['bencode']) do
 
     tests('d4:listl4:spami42eee').returns({'list' => ['spam', 42]}) do
       BitTorrent::Bencode.decode('d4:listl4:spami42eee')
+    end
+
+    tests(@example_torrent_data).returns(@example_torrent_hash) do
+      BitTorrent::Bencode.decode(@example_torrent_data)
     end
 
   end
@@ -48,6 +55,10 @@ Shindo.tests('BitTorrent::Bencode', ['bencode']) do
 
     tests({'list' => ['spam', 42]}).returns('d4:listl4:spami42eee') do
       BitTorrent::Bencode.encode({'list' => ['spam', 42]})
+    end
+
+    tests(@example_torrent_hash).returns(@example_torrent_data) do
+      BitTorrent::Bencode.encode(@example_torrent_hash)
     end
 
   end
