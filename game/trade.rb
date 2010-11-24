@@ -1,3 +1,6 @@
+# add vendors that contain the offers
+# add consumers that purchase from vendors/set prices based on demand
+# add ownership to offers (so you know what is revokable)
 # ? charge for each sale (percentage or flat?)
 #
 class Offer
