@@ -5,7 +5,7 @@ require 'zlib'
 class Keg
 
   def initialize(directory)
-    Thread.current[:keg] ||= {}
+    Thread.main[:keg] ||= {}
     @directory = File.expand_path(directory)
     files = Dir.glob(File.join(@directory, '*.data.keg'))
     unless files.empty?
@@ -22,7 +22,7 @@ class Keg
             data_end = file.pos
             data_length = data_end - data_start
             memory_data = [file.path, data_length, data_start, data_timestamp]
-            Thread.current[:keg][key] = memory_data
+            Thread.main[:keg][key] = memory_data
           else
             break
           end
@@ -34,7 +34,7 @@ class Keg
   end
 
   def get(key)
-    if value = Thread.current[:keg][key]
+    if value = Thread.main[:keg][key]
       file, data_length, data_position, data_timestamp = value
       data = IO.read(file, data_length, data_position)
       # file => [crc, 32 bit int timestamp, key length, value length, key, value]
@@ -82,7 +82,7 @@ class Keg
     data_length = data_end - data_start
     memory_data = [@file, data_length, data_start, data_timestamp]
     # ? also write hint file
-    Thread.current[:keg][key] = memory_data
+    Thread.main[:keg][key] = memory_data
   end
 
 end
