@@ -7,7 +7,30 @@ class Keg
   def initialize(directory)
     Thread.current[:keg] ||= {}
     @directory = File.expand_path(directory)
-    @file = File.join(@directory, "foo.keg.data")
+    files = Dir.glob(File.join(@directory, '*.data.keg'))
+    unless files.empty?
+      @file = files.last
+      File.open(@file, 'r') do |file|
+        file.binmode
+        while true
+          data_start = file.pos
+          metadata = file.read(16)
+          unless metadata.nil?
+            crc, data_timestamp, key_length, value_length = metadata.unpack('IIII')
+            key = file.read(key_length)
+            value = file.read(value_length)
+            data_end = file.pos
+            data_length = data_end - data_start
+            memory_data = [file.path, data_length, data_start, data_timestamp]
+            Thread.current[:keg][key] = memory_data
+          else
+            break
+          end
+        end
+      end
+    else
+      @file = File.join(@directory, "#{Time.now.to_i}.data.keg")
+    end
   end
 
   def get(key)
@@ -66,6 +89,7 @@ end
 
 if __FILE__ == $0
   keg = Keg.new(File.expand_path('~/keg'))
-  p keg.put('foo', 'bar')
+  p keg.get('foo')
+  p keg.put('foo', Time.now.to_i.to_s)
   p keg.get('foo')
 end
