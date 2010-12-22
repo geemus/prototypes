@@ -1,4 +1,12 @@
 # delete is writing a special tombstone value
+# merging reduces down to a single data file and single hint file
+#
+# class Pair
+# attr_accessor :key, :value
+# def self.parse (turn string into a pair)
+# def read(file) (read next pair from file or return nil)
+# def to_a (in memory representation)
+# def to_s (in file representation)
 
 require 'zlib'
 
