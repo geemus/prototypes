@@ -1,6 +1,3 @@
-# someday/maybe: visibility timeouts, maybe #{created_at}.#{data[:id]}.#{locked_at}
-# someday/maybe: peek
-
 require 'rubygems'
 require 'fog'
 require 'json'
@@ -14,18 +11,16 @@ class Squeue
   end
 
   def pop
-    file = @directory.files.all.first
-    data = JSON.parse(file.body)
-    file.destroy
-    data
+    if file = @directory.files.all.first
+      data = JSON.parse(file.body)
+      file.destroy
+      data
+    end
   end
 
   def push(data)
     key = Time.now.to_i.to_s << '.' << data[:id]
-    @directory.files.create(
-      :key  => key,
-      :body => data.to_json
-    )
+    @directory.files.create(:key  => key, :body => data.to_json)
     key
   end
 
