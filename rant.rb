@@ -12,9 +12,9 @@ class Rant
     :set_channel_id             => 0x51,
     :set_network_key            => 0x46,
     # Control
-    :system_reset     => 0x4A,
-    :open_channel     => 0x4B,
-    :request_message  => 0x4D,
+    :system_reset       => 0x4A,
+    :open_channel       => 0x4B,
+    :request_message    => 0x4D,
     # Channel Event
     :channel_event => 0x40,
     # Data
@@ -48,6 +48,7 @@ class Rant
     49 => :invalid_scan_tx_channel,
     64 => :nvm_full_error,
     65 => :nvm_write_error,
+    112 => :usb_string_write_fail
   }
 
   def initialize(device = '/dev/tty.usbserial-A800ekni')
@@ -55,6 +56,7 @@ class Rant
   end
 
   def send_message(type, data)
+    p type
     message = ""
     message << 0xA4.chr # SYNC
     message << data.length
@@ -83,12 +85,12 @@ class Rant
     elsif type == 0x4E
       offset = data[-2]
       heartrate = data[-1]
-      p "offset => #{offset}, heartrate => #{heartrate}"
+      puts "offset => #{offset}, heartrate => #{heartrate}"
+    elsif type == MESSAGES[:channel_event]
+      channel, message_id, message_code = data
+      puts "channel: #{channel}, message_id => #{message_id}, message: #{RESPONSES[message_code]}"
     else
-      puts "type: #{MESSAGES.invert[type]}"
-      puts "length: #{length}"
-      puts "data: [#{data.map {|datum| "0x#{datum.to_s(16)}"}.join(', ')}]"
-      puts "checksum: #{checksum}"
+      puts "type => #{MESSAGES.invert[type]}, length: #{length}, data: [#{data.map {|datum| "0x#{datum.to_s(16)}"}.join(', ')}], checksum: #{checksum}"
     end
   end
 
@@ -100,41 +102,67 @@ end
 
 rant = Rant.new
 
-p :system_reset
+##################################################
+
+# GARMIN
+
 rant.send_message(:system_reset, [0x00])
 sleep(0.5)
 
-p :request_message
 rant.send_message(:request_message, [0x00, Rant::MESSAGES[:capabilities]])
 rant.receive_message
 
-p :assign_channel
+# channel number, channel type, network number
 rant.send_message(:assign_channel, [0x00, 0x00, 0x00])
 rant.receive_message
 
-p :set_channel_id
-rant.send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x00, 0x00])
-rant.receive_message
-
-p :set_network_key
 rant.send_message(:set_network_key, [0x00, 0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45])
 rant.receive_message
 
-p :set_channel_period
+# channel number, device number, device number, device type id, transmission type
+rant.send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x78, 0x00])
+rant.receive_message
+
 rant.send_message(:set_channel_period, [0x00, 0x1F, 0x86])
 rant.receive_message
 
-p :set_channel_search_timeout
 rant.send_message(:set_channel_search_timeout, [0x00, 0xFF])
 rant.receive_message
 
-p :set_channel_rf_freq
 rant.send_message(:set_channel_rf_freq, [0x00, 0x39])
 rant.receive_message
 
-p :open_channel
 rant.send_message(:open_channel, [0x00])
 rant.receive_message
+
+##################################################
+
+# SUUNTO
+# see http://www.esl.fim.uni-passau.de/~fleitl/doc/crnt-daily/SuuntoReader_8h_source.html
+# see http://www.esl.fim.uni-passau.de/~fleitl/doc/crnt-daily/SuuntoReader_8cpp_source.html
+
+# rant.send_message(:system_reset, [0x00])
+# sleep(0.5)
+#
+# # channel number, channel type, network number
+# rant.send_message(:assign_channel, [0x00, 0x00, 0x00])
+# rant.receive_message
+#
+# # channel number, device number, device number, device type id, transmission type
+# rant.send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x84, 0x00])
+# rant.receive_message
+#
+# rant.send_message(:set_channel_period, [0x00, 0x19, 0x9A])
+# rant.receive_message
+#
+# rant.send_message(:set_channel_rf_freq, [0x00, 0x41])
+# rant.receive_message
+#
+# #rant.send_message(:set_channel_search_timeout, [0x00, 0xFF])
+# #rant.receive_message
+#
+# rant.send_message(:open_channel, [0x00])
+# rant.receive_message
 
 while true
   rant.receive_message
