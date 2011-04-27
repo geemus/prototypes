@@ -109,9 +109,6 @@ rant = Rant.new
 rant.send_message(:system_reset, [0x00])
 sleep(0.5)
 
-rant.send_message(:request_message, [0x00, Rant::MESSAGES[:capabilities]])
-rant.receive_message
-
 # channel number, channel type, network number
 rant.send_message(:assign_channel, [0x00, 0x00, 0x00])
 rant.receive_message
@@ -140,6 +137,7 @@ rant.receive_message
 # SUUNTO
 # see http://www.esl.fim.uni-passau.de/~fleitl/doc/crnt-daily/SuuntoReader_8h_source.html
 # see http://www.esl.fim.uni-passau.de/~fleitl/doc/crnt-daily/SuuntoReader_8cpp_source.html
+# see http://forum.sparkfun.com/viewtopic.php?f=13&t=17017&start=30
 
 # rant.send_message(:system_reset, [0x00])
 # sleep(0.5)
@@ -148,8 +146,11 @@ rant.receive_message
 # rant.send_message(:assign_channel, [0x00, 0x00, 0x00])
 # rant.receive_message
 #
+# rant.send_message(:set_network_key, [0x00, 0xB9, 0xAD, 0x32, 0x28, 0x75, 0x7E, 0xC7, 0x4D])
+# rant.receive_message
+#
 # # channel number, device number, device number, device type id, transmission type
-# rant.send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x84, 0x00])
+# rant.send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x78, 0x00])
 # rant.receive_message
 #
 # rant.send_message(:set_channel_period, [0x00, 0x19, 0x9A])
@@ -158,8 +159,8 @@ rant.receive_message
 # rant.send_message(:set_channel_rf_freq, [0x00, 0x41])
 # rant.receive_message
 #
-# #rant.send_message(:set_channel_search_timeout, [0x00, 0xFF])
-# #rant.receive_message
+# rant.send_message(:set_channel_search_timeout, [0x00, 0xFF])
+# rant.receive_message
 #
 # rant.send_message(:open_channel, [0x00])
 # rant.receive_message
