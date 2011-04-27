@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'appscript'
 require 'serialport'
 
 class Rant
@@ -86,6 +87,7 @@ class Rant
       offset = data[-2]
       heartrate = data[-1]
       puts "offset => #{offset}, heartrate => #{heartrate}"
+      Appscript.app('Quick Search Box').show_large_type(heartrate)
     elsif type == MESSAGES[:channel_event]
       channel, message_id, message_code = data
       puts "channel: #{channel}, message_id => #{message_id}, message: #{RESPONSES[message_code]}"
