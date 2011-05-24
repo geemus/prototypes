@@ -35,7 +35,12 @@ def next_category
   @remaining_categories.shift
 end
 
-while category = next_category
-  options = @exercises[category]
-  Formatador.display_line(@exercises[category][rand(options.length)])
+Formatador.display_line
+Formatador.display_line('Circuit:')
+Formatador.indent do
+  while category = next_category
+    options = @exercises[category]
+    Formatador.display_line(@exercises[category][rand(options.length)])
+  end
 end
+Formatador.display_line
