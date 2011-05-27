@@ -5,7 +5,7 @@ srand
 
 @exercises = {
   :abs    => [
-    '10x bosu situps',
+    '5x bosu situps',
     '3x 10s leg raises',
     '2x2 turkish getups'
   ],
@@ -16,8 +16,8 @@ srand
     '30s rowing'
   ],
   :gymnastics => [
-    '2x back lever',
-    '2x 10s planche'
+    'back lever',
+    'planche'
   ],
   :lower  => [
     '5x5 squat',
