@@ -5,13 +5,15 @@ srand
 
 @exercises = {
   :abs    => [
-    '5x bosu situps',
+    '6x bosu situps',
     '3x 10s leg raises',
-    '2x2 turkish getups'
+    '2x2 turkish getups',
+    '5x v situps'
   ],
   :cardio => [
+    '10x burpees',
     '10x10 tactical lunge',
-    '5x5 snatches',
+    '6x6 snatches',
     '30s jump rope',
     '30s rowing'
   ],
@@ -22,11 +24,11 @@ srand
   :lower  => [
     '5x5 squat',
     '5x5 pistols',
-    '5x5 calf press'
+    '6x6 calf press'
   ],
   :upper  => [
     '2x handstand pushup, 5x pull up',
-    '5x push up, 10x full body row'
+    '6x push up, 10x full body row'
   ]
 }
 
