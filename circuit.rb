@@ -20,6 +20,7 @@ srand
   ],
   :gymnastics => [
     'back lever',
+    'l-seat',
     'planche'
   ],
   :lower  => [
