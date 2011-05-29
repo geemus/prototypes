@@ -7,6 +7,7 @@ srand
   :abs    => [
     '6x bosu situps',
     '3x 10s leg raises',
+    '2x 20s transverse abdominus',
     '2x2 turkish getups',
     '5x v situps'
   ],
