@@ -24,13 +24,13 @@ srand
     'planche'
   ],
   :lower  => [
-    '5x5 squat',
-    '5x5 pistols',
-    '6x6 calf press'
+    '6x6 squat',
+    '4x4 pistols',
+    '8x8 calf press'
   ],
   :upper  => [
     '2x handstand pushup, 5x pull up',
-    '6x push up, 10x full body row'
+    '8x push up, 8x (explosive) full body row'
   ]
 }
 
