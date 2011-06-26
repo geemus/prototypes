@@ -1,4 +1,4 @@
-class Die
+class Dice
 
   def initialize(sides)
     srand
@@ -16,6 +16,6 @@ class Die
 end
 
 10.times do
-  p Die.new(6).roll
-  p Die.new(6).roll(2)
+  p Dice.new(6).roll
+  p Dice.new(6).roll(2)
 end
