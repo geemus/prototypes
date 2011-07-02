@@ -1,7 +1,8 @@
 # separate draw/discard into two separate decks
-# add push/pop shift/unshift as primary operations (each taking one or more items)
 
 class Deck
+
+  attr_accessor :cards
 
   def initialize(cards=[])
     srand
@@ -20,19 +21,41 @@ class Deck
     [*cards].each do |card|
       @cards.push(card)
     end
-    cards
+    @cards
+  end
+
+  def shift(count=1)
+    shifted_cards = []
+    count.times do
+      shifted_cards << @cards.shift
+    end
+    shifted_cards
   end
 
   def shuffle
     @cards = @cards.sort_by {|x,y| rand(2) - 1}
   end
 
+  def unshift(cards)
+    [*cards].each do |card|
+      @cards.unshift(card)
+    end
+    @cards
+  end
 end
 
+p 'deck'
 p deck = Deck.new([1,2,3])
+p 'deck.shuffle'
 p deck.shuffle
+p 'deck.pop(2)'
 p hand = deck.pop(2)
+p 'deck.push(hand.pop)'
 p deck.push(hand.pop)
+p 'hand.concat(deck.shift(2))'
+p hand.concat(deck.shift(2))
+p 'deck.unshift(hand.shift)'
+p deck.unshift(hand.shift)
 
 class LegacyDeck
 
