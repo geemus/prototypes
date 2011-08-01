@@ -46,10 +46,15 @@ end
 
 Formatador.display_line
 Formatador.display_line('Circuit:')
+circuit = []
 Formatador.indent do
   while category = next_category
     options = @exercises[category]
-    Formatador.display_line(@exercises[category][rand(options.length)])
+    circuit << {
+      :category => category,
+      :exercise => options[rand(options.length)]
+    }
   end
 end
+Formatador.display_table(circuit)
 Formatador.display_line
