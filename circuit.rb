@@ -15,7 +15,7 @@ srand
     '10x burpees',
     '10x10 tactical lunge',
     '6x6 snatches',
-    '30s jump rope',
+    '50x jump rope',
     '30s rowing'
   ],
   :gymnastics => [
