@@ -18,6 +18,15 @@ srand
     '50x jump rope',
     '30s rowing'
   ],
+  :grip => [
+    '5x gripprotrainer crush, 10x expand',
+    '5x kettlebell crush, 10x expand',
+    '5x kettlebell towel shrug, 10x expand',
+    '5x5 sledgehammer lever',
+    '5x5 sledgehammer rotation',
+    '5x5 sledgehammer rotation (crimp grip)',
+    '5x sledgehammer walk'
+  ],
   :gymnastics => [
 #    'back lever',
     'l-seat',
