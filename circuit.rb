@@ -37,10 +37,10 @@ srand
     '4x4 pistols',
     '8x8 calf press'
   ],
-  :upper_pull  => [
+#  :upper_pull  => [
 #    '5x pull up',
 #    '8x full body row'
-  ],
+#  ],
   :upper_push  => [
     '6x clean and press',
     '2x handstand pushup',
