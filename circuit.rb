@@ -6,7 +6,7 @@ srand
 @exercises = {
   :abs    => [
     '6x bosu situps',
-#    '3x 10s leg raises',
+    '3x 10s leg raises',
     '2x 20s transverse abdominus',
     '2x2 turkish getups',
     '5x v situps'
@@ -28,7 +28,7 @@ srand
     '5x sledgehammer walk'
   ],
   :gymnastics => [
-#    'back lever',
+    'back lever',
     'l-seat',
     'planche'
   ],
@@ -37,10 +37,10 @@ srand
     '4x4 pistols',
     '8x8 calf press'
   ],
-#  :upper_pull  => [
-#    '5x pull up',
+  :upper_pull  => [
+    '5x pull up',
 #    '8x full body row'
-#  ],
+  ],
   :upper_push  => [
     '6x clean and press',
     '2x handstand pushup',
