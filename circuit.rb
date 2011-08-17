@@ -55,15 +55,16 @@ end
 
 Formatador.display_line
 Formatador.display_line('Circuit:')
-circuit = []
+circuit, exercises = [], []
 Formatador.indent do
   while category = next_category
     options = @exercises[category]
+    exercises << options[rand(options.length)]
     circuit << {
       :category => category,
-      :exercise => options[rand(options.length)]
+      :exercise => exercises.last
     }
   end
 end
 Formatador.display_table(circuit)
-Formatador.display_line
+Formatador.display_lines(['', exercises.join(', '), ''])
