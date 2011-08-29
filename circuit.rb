@@ -4,12 +4,25 @@ require 'formatador'
 srand
 
 @exercises = {
-  :abs    => [
+  :core => [
     '6x bosu situps',
-    '3x 10s leg raises',
+    '5x bicycle crunches',
+    '5x crunches',
+    '5x diagonal chop',
+    '5x double crunch',
+    '5x good morning',
+    '5x overhead squat',
+    '5x plank hold',
+    '5x hanging leg raises',
+    '5x supine leg raises',
     '2x 20s transverse abdominus',
-    '2x2 turkish getups',
-    '5x v situps'
+    '5x v situps',
+    '5x sidebends',
+    '5x situp',
+    '5x stiff-leg situp',
+    '5x superman',
+    '5x torso circle'
+    '5x5 windmills',
   ],
   :cardio => [
     '10x burpees',
@@ -17,6 +30,9 @@ srand
     '6x6 snatches',
     '50x jump rope',
     '30s rowing'
+  ],
+  :full_body => [
+    '2x2 turkish getups'
   ],
   :grip => [
     '5x gripprotrainer crush, 10x expand',
