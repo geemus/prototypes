@@ -12,7 +12,7 @@ srand
     '5x double crunch',
     '5x good morning',
     '5x overhead squat',
-    '5x plank hold',
+    '30s plank hold',
     '5x hanging leg raises',
     '5x supine leg raises',
     '2x 20s transverse abdominus',
