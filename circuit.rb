@@ -21,7 +21,7 @@ srand
     '5x situp',
     '5x stiff-leg situp',
     '5x superman',
-    '5x torso circle'
+    '5x torso circle',
     '5x5 windmills',
   ],
   :cardio => [
