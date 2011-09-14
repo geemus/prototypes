@@ -58,7 +58,7 @@ srand
 #    '8x full body row'
   ],
   :upper_push  => [
-    '6x clean and press',
+    '5x5 clean and press',
     '2x handstand pushup',
     '8x push up',
   ]
