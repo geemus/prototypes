@@ -1,7 +1,7 @@
 STDOUT.sync = true
 
 def stretch(name, duration = 120)
-  print("#{name}: ")
+  print("#{name}:\n  ")
   `say -v victoria #{name}`
   interval = (duration.to_f / 26.0)
   26.times do |i|
@@ -23,3 +23,5 @@ end
 [
   'bridge'
 ].each {|name| stretch(name, 60)}
+
+`say -v victoria finish`
