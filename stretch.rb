@@ -2,7 +2,7 @@ STDOUT.sync = true
 
 def stretch(name, duration = 120)
   print("#{name}: ")
-  `say -v victoria#{name}`
+  `say -v victoria #{name}`
   interval = (duration.to_f / 26.0)
   26.times do |i|
     print('abcdefghijklmnopqrstuvwxyz'[i..i])
