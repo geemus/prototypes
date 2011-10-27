@@ -14,11 +14,9 @@ def stretches(names, duration = 120)
 end
 
 # splits, 2 minutes each
-#stretches(['pancake split', 'middle split', 'left split', 'right split'])
+stretches(['pancake split', 'middle split', 'left split', 'right split', 'pike stretch'])
 
 # bridge, 1 minute (for now)
-#stretches('bridge', 60)
-
-stretches(['middle split', 'pike stretch', 'pancake split'])
+stretches('bridge', 60)
 
 `say -v victoria finish`
