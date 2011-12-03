@@ -6,7 +6,9 @@ def levenshtein(first, last)
   distances[0] = 0.upto(last.length).to_a
   1.upto(last.length) do |last_index|
     1.upto(first.length) do |first_index|
-      if first[first_index - 1, 1] == last[last_index - 1, 1]
+      first_char = first[first_index - 1, 1]
+      last_char = last[last_index - 1, 1]
+      if first_char == last_char
         distances[first_index][last_index] = distances[first_index - 1][last_index - 1] # noop
       else
         distances[first_index][last_index] = [
@@ -58,7 +60,7 @@ def vs(first, last)
   p "#{first} <=> #{last} = { l => #{levenshtein(first, last)}, dl => #{damerau_levenshtein(first, last)} }"
 end
 
-vs("is", "is")
-vs("kitten", "sitting")
-vs("Saturday", "Sunday")
-vs("is", "si")
+vs("is", "is")            # => "is <=> is = { l => 0, dl => 0 }"
+vs("kitten", "sitting")   # => "kitten <=> sitting = { l => 3, dl => 3 }"
+vs("Saturday", "Sunday")  # => "Saturday <=> Sunday = { l => 3, dl => 3 }"
+vs("is", "si")            # => "is <=> si = { l => 2, dl => 1 }"
