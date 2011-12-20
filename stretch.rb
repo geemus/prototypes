@@ -1,14 +1,18 @@
 STDOUT.sync = true
 srand
 
+def say(string)
+  `say -v victoria #{string}`
+end
+
 def stretches(stretches)
-  `say -v victoria begin`
+  say('breeth')
   print("\n")
   name_length = stretches.keys.map {|name| name.length + 1}.max # 1 == :
   print("\r  #{'stretch:'.ljust(name_length)} \e[100m \e[0m\e[37m\e[47m#{'*' * 60}\e[0m\e[100m \e[0m\n")
   stretches.keys.sort_by { rand }.each do |name|
     duration = stretches[name]
-    `say -v victoria #{name}`
+    say(name)
     interval = (duration.to_f / 60.0)
     name += ':'
     60.times do |i|
@@ -20,7 +24,7 @@ def stretches(stretches)
     print("\n")
   end
   print("\n")
-  `say -v victoria end`
+  say('relax')
 end
 
 stretches({
@@ -28,6 +32,6 @@ stretches({
   'left split'    => 120,
   'middle split'  => 120,
   'pancake split' => 120,
-  'pike stretch'  => 120,
+  'pike'          => 120,
   'right split'   => 120
 })
