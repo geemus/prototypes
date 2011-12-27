@@ -33,6 +33,5 @@ stretches({
   'left split'    => 120,
   'middle split'  => 120,
   'pancake split' => 120,
-  'pike'          => 120,
   'right split'   => 120
 })
