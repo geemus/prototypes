@@ -13,6 +13,7 @@ def stretches(stretches)
   stretches.keys.sort_by { rand }.each do |name|
     duration = stretches[name]
     say(name)
+    sleep(2) # pause for setup/transition
     interval = (duration.to_f / 60.0)
     name += ':'
     60.times do |i|
