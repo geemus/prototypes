@@ -8,7 +8,8 @@ end
 def stretches(stretches)
   say('breeth')
   print("\n")
-  name_length = stretches.keys.map {|name| name.length + 1}.max # 1 == :
+  keys = stretches.keys + ['stretch']
+  name_length = keys.map {|name| "#{name}:".length}.max
   print("\r  #{'stretch:'.ljust(name_length)} \e[100m \e[0m\e[37m\e[47m#{'*' * 60}\e[0m\e[100m \e[0m\n")
   stretches.keys.sort_by { rand }.each do |name|
     duration = stretches[name]
