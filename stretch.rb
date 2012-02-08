@@ -12,7 +12,7 @@ def stretches(stretches)
   name_length = keys.map {|name| "#{name}:".length}.max
   print("\r  #{'stretch:'.ljust(name_length)} \e[100m \e[0m\e[37m\e[47m#{'*' * 60}\e[0m\e[100m \e[0m\n")
   #stretches.keys.sort_by { rand }.each do |name|
-  %w{pike left right middle bridge}.each do |name|
+  %w{bridge pike left right middle}.each do |name|
     duration = stretches[name]
     say(name)
     sleep(2) # pause for setup/transition
