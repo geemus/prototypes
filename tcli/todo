@@ -1,0 +1,4 @@
+how do we make it remain responsive on longer requests(asynch/threaded/polling?)
+input validation
+
+? use chunked responses to provide ongoing feedback

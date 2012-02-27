@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require("excon")
+
+require(File.expand_path(File.join(File.dirname(__FILE__), "server")))
+
+Excon.defaults[:mock] = true
+
+connection = Excon.new('http://api.heroku.com')
+response = connection.post(:body => ARGV)
+
+case response.headers['Content-Type']
+when "text/stderr"
+  STDERR.puts(response.body)
+when "text/stdout"
+  STDOUT.puts(response.body)
+end
