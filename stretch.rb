@@ -15,7 +15,7 @@ def stretches(stretches)
   stretches.each do |name, duration|
     print("\r  #{name.rjust(name_length)} \e[47m\e[90m|\e[0m#{' ' * 60}\e[47m\e[90m|\e[0m")
     say(name)
-    sleep(3) # pause for setup/transition
+    sleep(4) # pause for setup/transition
     interval = (duration.to_f / 60.0)
     60.times do |i|
       i += 1
@@ -28,14 +28,26 @@ def stretches(stretches)
   say('relax')
 end
 
-stretches([
-  ["bridge",      60],
-  ["pike",        60],
-  ["couch left",  60],
-  ["couch right", 60],
-  ["left",        60],
-  ["right",       60],
-  ["cobbler",     60],
-  ["pancake",     60],
-  ["middle",      60]
-])
+stretches = case ARGV.pop
+when "trifecta"
+  [
+    ["bridge", 20],
+    ["l-seat", 10],
+    ["l-seat", 10],
+    ["twist",  20],
+    ["twist",  20]
+  ]
+else
+  [
+    ["pike",        60],
+    ["couch left",  60],
+    ["couch right", 60],
+    ["left",        60],
+    ["right",       60],
+    ["cobbler",     60],
+    ["pancake",     60],
+    ["middle",      60]
+  ]
+end
+
+stretches(stretches)
