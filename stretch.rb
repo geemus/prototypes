@@ -15,7 +15,7 @@ def stretches(stretches)
   stretches.each do |name, duration|
     print("\r  #{name.rjust(name_length)} \e[47m\e[90m|\e[0m#{' ' * 60}\e[47m\e[90m|\e[0m")
     say(name)
-    sleep(4) # pause for setup/transition
+    sleep(5) # pause for setup/transition
     interval = (duration.to_f / 60.0)
     60.times do |i|
       i += 1
