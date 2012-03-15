@@ -69,7 +69,7 @@ REGULAR_PASSIVES = %w{
 
 string = ARGV.join(" ")
 
-highlighted = string.gsub(/#{(IRREGULAR_PASSIVES + REGULAR_PASSIVES).join("|")}/) {|passive| "[negative]#{passive}[/]"}
+highlighted = string.gsub(/(^|\s)(#{(IRREGULAR_PASSIVES + REGULAR_PASSIVES).join("|")})(\s|$)/) {"#{$1}[negative]#{$2}[/]#{$3}"}
 if highlighted == string
   Formatador.display_line("Congrats, no passive voice!")
 else
