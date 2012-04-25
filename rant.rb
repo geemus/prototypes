@@ -52,7 +52,35 @@ class Rant
   }
 
   def initialize(device = '/dev/tty.usbserial-A800ekni')
-    @port = SerialPort.new('/dev/tty.usbserial-A800ekni', 4800, 8, 1, SerialPort::NONE)
+    @port = SerialPort.new(device, 4800, 8, 1, SerialPort::NONE)
+
+    # GARMIN
+
+    send_message(:system_reset, [0x00])
+    sleep(0.5)
+
+    # channel number, channel type, network number
+    send_message(:assign_channel, [0x00, 0x00, 0x00])
+    receive_message
+
+    send_message(:set_network_key, [0x00, 0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45])
+    receive_message
+
+    # channel number, device number, device number, device type id, transmission type
+    send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x78, 0x00])
+    receive_message
+
+    send_message(:set_channel_period, [0x00, 0x1F, 0x86])
+    receive_message
+
+    send_message(:set_channel_search_timeout, [0x00, 0xFF])
+    receive_message
+
+    send_message(:set_channel_rf_freq, [0x00, 0x39])
+    receive_message
+
+    send_message(:open_channel, [0x00])
+    receive_message
   end
 
   def send_message(type, data)
@@ -102,69 +130,6 @@ class Rant
 end
 
 rant = Rant.new
-
-##################################################
-
-# GARMIN
-
-rant.send_message(:system_reset, [0x00])
-sleep(0.5)
-
-# channel number, channel type, network number
-rant.send_message(:assign_channel, [0x00, 0x00, 0x00])
-rant.receive_message
-
-rant.send_message(:set_network_key, [0x00, 0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45])
-rant.receive_message
-
-# channel number, device number, device number, device type id, transmission type
-rant.send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x78, 0x00])
-rant.receive_message
-
-rant.send_message(:set_channel_period, [0x00, 0x1F, 0x86])
-rant.receive_message
-
-rant.send_message(:set_channel_search_timeout, [0x00, 0xFF])
-rant.receive_message
-
-rant.send_message(:set_channel_rf_freq, [0x00, 0x39])
-rant.receive_message
-
-rant.send_message(:open_channel, [0x00])
-rant.receive_message
-
-##################################################
-
-# SUUNTO
-# see http://www.esl.fim.uni-passau.de/~fleitl/doc/crnt-daily/SuuntoReader_8h_source.html
-# see http://www.esl.fim.uni-passau.de/~fleitl/doc/crnt-daily/SuuntoReader_8cpp_source.html
-# see http://forum.sparkfun.com/viewtopic.php?f=13&t=17017&start=30
-
-# rant.send_message(:system_reset, [0x00])
-# sleep(0.5)
-#
-# # channel number, channel type, network number
-# rant.send_message(:assign_channel, [0x00, 0x00, 0x00])
-# rant.receive_message
-#
-# rant.send_message(:set_network_key, [0x00, 0xB9, 0xAD, 0x32, 0x28, 0x75, 0x7E, 0xC7, 0x4D])
-# rant.receive_message
-#
-# # channel number, device number, device number, device type id, transmission type
-# rant.send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x78, 0x00])
-# rant.receive_message
-#
-# rant.send_message(:set_channel_period, [0x00, 0x19, 0x9A])
-# rant.receive_message
-#
-# rant.send_message(:set_channel_rf_freq, [0x00, 0x41])
-# rant.receive_message
-#
-# rant.send_message(:set_channel_search_timeout, [0x00, 0xFF])
-# rant.receive_message
-#
-# rant.send_message(:open_channel, [0x00])
-# rant.receive_message
 
 while true
   rant.receive_message
