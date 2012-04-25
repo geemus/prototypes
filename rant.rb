@@ -129,10 +129,14 @@ class Rant
 
 end
 
-rant = Rant.new
+if __FILE__ == $0
 
-while true
-  rant.receive_message
+  rant = Rant.new
+
+  while true
+    rant.receive_message
+  end
+
+  rant.close
+
 end
-
-rant.close
