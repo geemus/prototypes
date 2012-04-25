@@ -63,9 +63,10 @@ class Rant
     message << MESSAGES[type].chr
     message << [*data].map {|x| x.chr}.join
 
-    checksum = message[0]
-    1.upto(message.length - 1) do |i|
-      checksum ^= message[i]
+    message_bytes = message.bytes.to_a
+    checksum = message_bytes[0]
+    1.upto(message_bytes.length - 1) do |i|
+      checksum ^= message_bytes[i]
     end
     message << checksum.chr
 
@@ -73,14 +74,14 @@ class Rant
   end
 
   def receive_message
-    @port.getc # SYNC
-    length = @port.getc
-    type = @port.getc
+    @port.getbyte # SYNC
+    length = @port.getbyte
+    type = @port.getbyte
     data = []
     length.times do |x|
-      data << @port.getc
+      data << @port.getbyte
     end
-    checksum = @port.getc
+    checksum = @port.getbyte
     if data == [0x0, 0x1, 0x2]
     elsif type == 0x4E
       offset = data[-2]
