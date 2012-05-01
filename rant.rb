@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'formatador'
 require 'serialport'
 
 class Rant
@@ -50,6 +51,8 @@ class Rant
     65 => :nvm_write_error,
     112 => :usb_string_write_fail
   }
+
+  attr_accessor :heart_rate, :offset
 
   def initialize(device = '/dev/tty.usbserial-A800ekni')
     @port = SerialPort.new(device, 4800, 8, 1, SerialPort::NONE)
@@ -112,9 +115,9 @@ class Rant
     checksum = @port.getbyte
     if data == [0x0, 0x1, 0x2]
     elsif type == 0x4E
-      offset = data[-2]
-      heartrate = data[-1]
-      puts "offset => #{offset}, heartrate => #{heartrate}"
+      self.offset = data[-2]
+      self.heart_rate = data[-1]
+      #puts "offset => #{self.offset}, heartrate => #{self.heart_rate}"
     elsif type == MESSAGES[:channel_event]
       channel, message_id, message_code = data
       puts "channel: #{channel}, message_id => #{message_id}, message: #{RESPONSES[message_code]}"
@@ -133,8 +136,15 @@ if __FILE__ == $0
 
   rant = Rant.new
 
+  start = Time.now
+
   while true
     rant.receive_message
+    elapsed = (Time.now - start).to_i
+    minutes = (elapsed / 60).to_s.rjust(2, "0")
+    seconds = (elapsed % 60).to_s.rjust(2, "0")
+    heart_rate = rant.heart_rate.to_s.rjust(3, "0")
+    Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate}  ", 15)
   end
 
   rant.close
