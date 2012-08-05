@@ -39,12 +39,12 @@ when "trifecta"
   ]
 else
   [
-    ["pike",    90],
-    ["left",    90],
-    ["right",   90],
-    ["cobbler", 90],
-    ["pancake", 90],
-    ["middle",  90]
+    ["pike",    120],
+    ["left",    120],
+    ["right",   120],
+    ["cobbler", 120],
+    ["pancake", 120],
+    ["middle",  120]
   ]
 end
 
