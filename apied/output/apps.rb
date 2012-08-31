@@ -5,16 +5,16 @@ class Client
   def delete_apps(app)
     connection.request(
       :method => :delete,
-      :path  => "apps/#{app}"
+      :path   => "/apps/#{app}"
     )
   end
 
   # Public: Get a listing of your apps.
   #
-  def get_apps
+  def get_apps()
     connection.request(
       :method => :get,
-      :path  => "/apps"
+      :path   => "/apps"
     )
   end
 
@@ -23,7 +23,7 @@ class Client
   def get_apps(app)
     connection.request(
       :method => :get,
-      :path  => "apps/#{app}"
+      :path   => "/apps/#{app}"
     )
   end
 
@@ -33,11 +33,11 @@ class Client
   #           :name - identifier for app (default: randomly generated name).
   #           :stack - technology stack to run app on (default: cedar).
   #
-  def post_apps(options = {})
+  def post_apps(, options = {})
     connection.request(
       :body   => options,
       :method => :post,
-      :path  => "/apps"
+      :path   => "/apps"
     )
   end
 
@@ -46,7 +46,7 @@ class Client
   def put_apps(app)
     connection.request(
       :method => :put,
-      :path  => "apps/#{app}"
+      :path   => "/apps/#{app}"
     )
   end
 

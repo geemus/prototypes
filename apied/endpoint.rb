@@ -33,7 +33,7 @@ class Endpoint
         data << {
           :accepts  => {},
           :method   => :#{method},
-          :path     => path,
+          :path     => '/' << [name.downcase, path].compact.join,
           :requires => {}
         }
         if block_given?
@@ -104,20 +104,16 @@ class Endpoint
         client << "      :body   => options,"
       end
       client << "      :method => :#{datum[:method]},"
-      path = if datum[:path].nil?
-        "/#{endpoint}"
-      else
-        path = []
-        "#{endpoint}#{datum[:path]}".split('/').each do |segment|
-          if segment[0..1] =~ /^:/
-            path << ('#{' << segment[1..-1] << '}')
-          else
-            path << segment
-          end
+      path = []
+      datum[:path].split('/').each do |segment|
+        if segment[0..1] =~ /^:/
+          path << ('#{' << segment[1..-1] << '}')
+        else
+          path << segment
         end
-        path.join('/')
       end
-      client << "      :path  => \"#{path}\""
+      path = path.join('/')
+      client << "      :path   => \"#{path}\""
       client << "    )"
       client << "  end\n"
     end
@@ -140,7 +136,7 @@ class Endpoint
     docs = ["# #{name}"]
 
     data.each do |datum|
-      path = ['/', name.downcase, datum[:path]].compact.join
+      path = datum[:path]
 
       docs << "## #{datum[:method].upcase} #{path}\n"
 
