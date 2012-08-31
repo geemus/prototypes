@@ -29,5 +29,6 @@ PLATFORMS
 DEPENDENCIES
   activemodel
   heroku-api
+  rack
   redcarpet
   sinatra

@@ -6,17 +6,23 @@ require 'sinatra/base'
 
 class Endpoint
 
-  class App < Sinatra::Base
+  class Server < Sinatra::Base
 
     private
 
     def data
-      @data ||= JSON.decode(request.body)
+      @data ||= if (body = request.body.read) && !body.empty?
+        JSON.parse(request.body)
+      else
+        {}
+      end
     end
 
     def heroku
       @heroku ||= begin
-        api_key = request['Authorization'].split(' ', 2).last.unpack('m').split(':', 2).last
+        # FIXME: hardcoded for simplicity
+        request['Authorization'] ||= "Basic #{[':REDACTED'].pack('m').chomp}"
+        api_key = request['Authorization'].split(' ', 2).last.unpack('m').first.split(':', 2).last
         heroku = Heroku::API.new(:api_key => api_key, :mock => true)
       end
     end
@@ -59,7 +65,7 @@ class Endpoint
 
   def self.response(&block)
     data.last[:response] = block
-    App.send(data.last[:method], ["#{name}", data.last[:path]].compact.join, &block)
+    Endpoint::Server.send(data.last[:method], data.last[:path], &block)
   end
 
   def self.sample(sample)
@@ -171,3 +177,5 @@ class Endpoint
   end
 
 end
+
+require './apps'

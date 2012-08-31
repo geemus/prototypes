@@ -4,5 +4,6 @@ source "https://rubygems.org"
 # gem "rails"
 gem 'activemodel'
 gem 'heroku-api'
+gem 'rack'
 gem 'redcarpet'
 gem 'sinatra'

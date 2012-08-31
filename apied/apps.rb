@@ -23,7 +23,7 @@ class Apps < Endpoint
     response do
       response = heroku.post_app(data)
       status(response.status)
-      body(response.body)
+      body(response.body.to_json)
     end
 
     sample(<<-SAMPLE)
