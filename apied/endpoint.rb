@@ -29,6 +29,10 @@ class Endpoint
 
   end
 
+end
+
+class Endpoint
+
   def self.data
     @data ||= []
   end
