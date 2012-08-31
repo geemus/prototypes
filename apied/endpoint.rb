@@ -34,16 +34,26 @@ end
 class Endpoint
 
   def self.data
-    @data ||= []
+    @data ||= {}
+  end
+
+  def self.current
+    @current
+  end
+
+  def self.current=(new_current)
+    @current = new_current
   end
 
   %w{delete get post put}.each do |method|
     class_eval <<-DEF, __FILE__, __LINE__ + 1
       def self.#{method}(path = nil, &block)
-        data << {
+        full_path = '/' << [name.downcase, path].compact.join
+        self.current = ['#{method.upcase}', full_path].join(' ')
+        self.data[current] = {
           :accepts  => {},
           :method   => :#{method},
-          :path     => '/' << [name.downcase, path].compact.join,
+          :path     => full_path,
           :requires => {}
         }
         if block_given?
@@ -56,24 +66,23 @@ class Endpoint
   # dsl!
 
   def self.description(description)
-    data.last[:description] = description
+    data[current][:description] = description
   end
 
   def self.accepts(name, description)
-    data.last[:accepts][name] = description
+    data[current][:accepts][name] = description
   end
 
   def self.requires(name, description)
-    data.last[:requires][name] = description
+    data[current][:requires][name] = description
   end
 
   def self.response(&block)
-    data.last[:response] = block
-    Endpoint::Server.send(data.last[:method], data.last[:path], &block)
+    Endpoint::Server.send(data[current][:method], data[current][:path], &block)
   end
 
   def self.sample(sample)
-    data.last[:sample] = sample
+    data[current][:sample] = sample
   end
 
   # output
@@ -81,7 +90,7 @@ class Endpoint
   def self.to_client
     client = ["class Client\n"]
 
-    data.each do |datum|
+    data.each do |key, datum|
       endpoint = name.downcase
       client << "  # Public: #{datum[:description]}"
       client << '  #'
@@ -145,7 +154,7 @@ class Endpoint
   def self.to_md
     docs = ["# #{name}"]
 
-    data.each do |datum|
+    data.each do |key, datum|
       path = datum[:path]
 
       docs << "## #{datum[:method].upcase} #{path}\n"
@@ -161,7 +170,7 @@ class Endpoint
         unless datum[type].empty?
           docs << "#### #{type.capitalize}\n"
           datum[type].each do |key, value|
-            docs << "* `#{key}` #{value}"
+            docs << "* `#{key}` - #{value}"
           end
         end
       end

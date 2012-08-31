@@ -30,8 +30,8 @@ class Client
   # Public: Create a new app.
   #
   # options - hash of options for operation (default: {})
-  #           :name - identifier for app (default: randomly generated name).
-  #           :stack - technology stack to run app on (default: cedar).
+  #           :name - The String name for the app (default: randomly generated name).
+  #           :stack - The String technology stack to run app on (default: cedar).
   #
   def post_apps(options = {})
     connection.request(
@@ -43,8 +43,13 @@ class Client
 
   # Public: Update an existing app.
   #
-  def put_apps(app)
+  # options - hash of options for operation (default: {})
+  #           :name - The new String name for app.
+  #           :maintenance - The Boolean maintenance mode status.
+  #
+  def put_apps(app, options = {})
     connection.request(
+      :body   => options,
       :method => :put,
       :path   => "/apps/#{app}"
     )
