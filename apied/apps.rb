@@ -51,7 +51,7 @@ class Apps < Endpoint
   end
 
   p data
-  File.open('./output/apps.html', 'w+') {|file| file.write(to_html)}
+  File.open('./output/apps.md', 'w+') {|file| file.write(to_md)}
   File.open('./output/apps.rb', 'w+') {|file| file.write(to_client)}
 
 end
