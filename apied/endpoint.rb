@@ -83,10 +83,10 @@ class Endpoint
         client <<  '  #'
       end
       client << "  def #{datum[:method]}_#{endpoint}"
-      unless datum[:path].nil? && datum[:accepts].empty? && datum[:requires].empty?
+      unless !datum[:path].include?(':') && datum[:accepts].empty? && datum[:requires].empty?
         client.last << '('
       end
-      unless datum[:path].nil?
+      if datum[:path].include?(':')
         segments = datum[:path].split('/').select {|segment| segment =~ /^:/}
         client.last << segments.map {|segment| segment[1..-1]}.join(', ')
         unless datum[:accepts].empty? && datum[:requires].empty?
@@ -96,7 +96,7 @@ class Endpoint
       unless datum[:accepts].empty? && datum[:requires].empty?
         client.last << 'options = {}'
       end
-      unless datum[:path].nil? && datum[:accepts].empty? && datum[:requires].empty?
+      unless !datum[:path].include?(':') && datum[:accepts].empty? && datum[:requires].empty?
         client.last << ')'
       end
       client << "    connection.request("

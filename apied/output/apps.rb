@@ -11,7 +11,7 @@ class Client
 
   # Public: Get a listing of your apps.
   #
-  def get_apps()
+  def get_apps
     connection.request(
       :method => :get,
       :path   => "/apps"
@@ -33,7 +33,7 @@ class Client
   #           :name - identifier for app (default: randomly generated name).
   #           :stack - technology stack to run app on (default: cedar).
   #
-  def post_apps(, options = {})
+  def post_apps(options = {})
     connection.request(
       :body   => options,
       :method => :post,
