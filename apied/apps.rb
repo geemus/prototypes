@@ -147,7 +147,7 @@ class Apps < Endpoint
     SAMPLE
   end
 
-  p data
+  p Endpoint.data
   File.open('./output/apps.md', 'w+') {|file| file.write(to_md)}
   File.open('./output/apps.rb', 'w+') {|file| file.write(to_client)}
 

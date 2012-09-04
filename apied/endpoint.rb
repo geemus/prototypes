@@ -12,7 +12,7 @@ class Endpoint
 
     def data
       @data ||= if (body = request.body.read) && !body.empty?
-        JSON.parse(request.body)
+        JSON.parse(body)
       else
         {}
       end
@@ -49,8 +49,8 @@ class Endpoint
     class_eval <<-DEF, __FILE__, __LINE__ + 1
       def self.#{method}(path = nil, &block)
         full_path = '/' << [name.downcase, path].compact.join
-        self.current = ['#{method.upcase}', full_path].join(' ')
-        self.data[current] = {
+        Endpoint.current = ['#{method.upcase}', full_path].join(' ')
+        Endpoint.data[Endpoint.current] = {
           :accepts  => {},
           :method   => :#{method},
           :path     => full_path,
@@ -66,23 +66,43 @@ class Endpoint
   # dsl!
 
   def self.description(description)
-    data[current][:description] = description
+    Endpoint.data[Endpoint.current][:description] = description
   end
 
   def self.accepts(name, description)
-    data[current][:accepts][name] = description
+    Endpoint.data[Endpoint.current][:accepts][name.to_s] = description
   end
 
   def self.requires(name, description)
-    data[current][:requires][name] = description
+    Endpoint.data[Endpoint.current][:requires][name.to_s] = description
   end
 
   def self.response(&block)
-    Endpoint::Server.send(data[current][:method], data[current][:path], &block)
+    accepts   = Endpoint.data[Endpoint.current][:accepts]
+    requires  = Endpoint.data[Endpoint.current][:requires]
+    Endpoint::Server.send(Endpoint.data[Endpoint.current][:method], Endpoint.data[Endpoint.current][:path]) do
+      errors = []
+      data.keys.each do |key|
+        unless (accepts.keys | requires.keys).include?(key)
+          errors << "`#{key}` is not a recognized option."
+        end
+        requires.keys.each do |key|
+          unless data.keys.include?(key)
+            errors << "`#{key}` is required."
+          end
+        end
+      end
+      if errors.empty?
+        instance_eval(&block)
+      else
+        status(412)
+        body({'errors' => errors}.to_json)
+      end
+    end
   end
 
   def self.sample(sample)
-    data[current][:sample] = sample
+    Endpoint.data[Endpoint.current][:sample] = sample
   end
 
   # output
@@ -90,7 +110,7 @@ class Endpoint
   def self.to_client
     client = ["class Client\n"]
 
-    data.each do |key, datum|
+    Endpoint.data.each do |key, datum|
       endpoint = name.downcase
       client << "  # Public: #{datum[:description]}"
       client << '  #'
@@ -154,7 +174,7 @@ class Endpoint
   def self.to_md
     docs = ["# #{name}"]
 
-    data.each do |key, datum|
+    Endpoint.data.each do |key, datum|
       path = datum[:path]
 
       docs << "## #{datum[:method].upcase} #{path}\n"
