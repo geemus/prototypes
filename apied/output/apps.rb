@@ -1,5 +1,12 @@
 class Client
 
+  def connection
+    @connection ||= begin
+      require('excon')
+      Excon.new('http://localhost:9292')
+    end
+  end
+
   # Public: Delete an app
   #
   def delete_apps(app)

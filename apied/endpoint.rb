@@ -110,6 +110,13 @@ class Endpoint
   def self.to_client
     client = ["class Client\n"]
 
+    client << '  def connection'
+    client << "    @connection ||= begin"
+    client << "      require('excon')"
+    client << "      Excon.new('http://localhost:9292')"
+    client << '    end'
+    client << "  end\n"
+
     Endpoint.data.each do |key, datum|
       endpoint = name.downcase
       client << "  # Public: #{datum[:description]}"
