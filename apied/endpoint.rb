@@ -104,7 +104,7 @@ class Endpoint
         end
         requires.keys.each do |key|
           unless data.keys.include?(key)
-            errors << "`#{key}` is required."
+            errors << "`#{key}` is a required option."
           end
         end
       end
@@ -126,6 +126,8 @@ class Endpoint
   def self.to_client
     client = ["class Client\n"]
 
+    client << " class Errors < StandardError; end\n"
+
     client << '  def connection'
     client << "    @connection ||= begin"
     client << "      require('excon')"
@@ -134,14 +136,18 @@ class Endpoint
     client << "  end\n"
 
     Endpoint.data.each do |key, datum|
-      endpoint = if datum[:path].include?(':')
+      name = if datum[:path].include?(':')
         singular
       else
         plural
       end
+
+      endpoint_has_arguments = datum[:path].include?(':')
+      endpoint_has_options = !(datum[:accepts].empty? && datum[:requires].empty?)
+
       client << "  # Public: #{datum[:description]}"
       client << '  #'
-      unless datum[:accepts].empty? && datum[:requires].empty?
+      if endpoint_has_options
         client << "  # options - hash of options for operation (default: {})"
         keys = (datum[:accepts].keys + datum[:requires].keys).sort
         longest_key = keys.map {|key| key.length}.max
@@ -151,26 +157,47 @@ class Endpoint
         end
         client <<  '  #'
       end
-      client << "  def #{datum[:method]}_#{endpoint}"
-      unless !datum[:path].include?(':') && datum[:accepts].empty? && datum[:requires].empty?
+      client << "  def #{datum[:method]}_#{name}"
+      if endpoint_has_arguments || endpoint_has_options
         client.last << '('
       end
-      if datum[:path].include?(':')
+      if endpoint_has_arguments
         segments = datum[:path].split('/').select {|segment| segment =~ /^:/}
         client.last << segments.map {|segment| segment[1..-1]}.join(', ')
         unless datum[:accepts].empty? && datum[:requires].empty?
           client.last << ', '
         end
       end
-      unless datum[:accepts].empty? && datum[:requires].empty?
-        client.last << 'options = {}'
+      if endpoint_has_options
+        client.last << 'options={}'
       end
-      unless !datum[:path].include?(':') && datum[:accepts].empty? && datum[:requires].empty?
+      if endpoint_has_arguments || endpoint_has_options
         client.last << ')'
       end
+
+      if endpoint_has_options
+        client << '    errors = []'
+        client << '    options.keys.each do |key|'
+        known_keys = datum[:accepts].keys | datum[:requires].keys
+        client << "      unless %w{#{known_keys.join(' ')}}.include?(key)"
+        client << '        errors << "`#{key}` is not a recognized option."'
+        client << '      end'
+        client << '    end'
+        unless datum[:requires].empty?
+          client << "    %w{#{datum[:requires].keys.join(' ')}}.each do |key|"
+          client << '      unless options.keys.include?(key)'
+          client << '        errors << "`#{key}` is a required option."'
+          client << '      end'
+          client << '    end'
+        end
+        client << '    unless errors.empty?'
+        client << '      raise Errors.new(["Request Errors:"].concat(errors).join("\n"))'
+        client << '    end'
+      end
+
       client << "    connection.request("
-      unless datum[:accepts].empty? && datum[:requires].empty?
-        client << "      :body   => options,"
+      if endpoint_has_options
+        client << "      :body   => options.to_json,"
       end
       client << "      :method => :#{datum[:method]},"
       path = []
