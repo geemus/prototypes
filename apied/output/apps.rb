@@ -1,3 +1,5 @@
+require 'json'
+
 class Client
 
  class Errors < StandardError; end
@@ -5,7 +7,13 @@ class Client
   def connection
     @connection ||= begin
       require('excon')
-      Excon.new('http://localhost:9292')
+      connection = Excon.new('http://localhost:9292')
+      def connection.request(params, &block)
+        response = super
+        response.body = JSON.parse(response.body) rescue response.body
+        response
+      end
+      connection
     end
   end
 
@@ -42,10 +50,10 @@ class Client
   #           :name  - The String name for the app (default: randomly generated name).
   #           :stack - The String technology stack to run app on (default: cedar).
   #
-  def post_apps(options={})
+  def post_app(options={})
     errors = []
     options.keys.each do |key|
-      unless %w{name stack}.include?(key)
+      unless %w{name stack}.include?(key.to_s)
         errors << "`#{key}` is not a recognized option."
       end
     end
@@ -68,7 +76,7 @@ class Client
   def put_app(app, options={})
     errors = []
     options.keys.each do |key|
-      unless %w{name maintenance}.include?(key)
+      unless %w{name maintenance}.include?(key.to_s)
         errors << "`#{key}` is not a recognized option."
       end
     end

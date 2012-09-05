@@ -7,7 +7,14 @@ class Valid
 
   validates_presence_of :name
 end
-# validates_acceptance_of, validates_confirmation_of, validates_exclusion_of, validates_format_of, validates_inclusion_of, validates_length_of, validates_numericality_of, validates_presence_of, validates_size_of
+
+# validates_exclusion_of
+# validates_format_of
+# validates_inclusion_of
+# validates_length_of
+# validates_numericality_of
+# validates_presence_of
+# validates_size_of
 
 valid = Valid.new
 p valid.valid?

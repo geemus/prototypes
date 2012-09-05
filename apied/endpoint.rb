@@ -67,13 +67,14 @@ class Endpoint
         full_path = '/' << [plural, path].compact.join
         Endpoint.current = ['#{method.upcase}', full_path].join(' ')
         Endpoint.data[Endpoint.current] = {
-          :accepts  => {},
-          :method   => :#{method},
-          :path     => full_path,
+          :accepts    => {},
+          :method     => :#{method},
+          :path       => full_path
         }
         if block_given?
           instance_eval(&block)
         end
+        Endpoint.current = nil
       end
     DEF
   end
@@ -90,11 +91,17 @@ class Endpoint
 
   def self.response(&block)
     accepts   = Endpoint.data[Endpoint.current][:accepts]
+    validates = Endpoint.data[plural][:validates]
     Endpoint::Server.send(Endpoint.data[Endpoint.current][:method], Endpoint.data[Endpoint.current][:path]) do
       errors = []
       data.keys.each do |key|
         unless accepts.keys.include?(key)
           errors << "`#{key}` is not a recognized option."
+        end
+        validates[key].each do |validation|
+          unless instance_eval(&validation[:block])
+            errors << validation[:description]
+          end
         end
       end
       if errors.empty?
@@ -110,25 +117,41 @@ class Endpoint
     Endpoint.data[Endpoint.current][:sample] = sample
   end
 
+  def self.validates(name, description, &block)
+    Endpoint.data[plural] ||= {}
+    Endpoint.data[plural][:validates] ||= Hash.new {|hash, key| hash[key] = []}
+    Endpoint.data[plural][:validates][name.to_s] << { :description => description, :block => block }
+  end
+
   # output
 
   def self.to_client
-    client = ["class Client\n"]
+    client = ["require 'json'\n", "class Client\n"]
 
     client << " class Errors < StandardError; end\n"
 
     client << '  def connection'
     client << "    @connection ||= begin"
     client << "      require('excon')"
-    client << "      Excon.new('http://localhost:9292')"
+    client << "      connection = Excon.new('http://localhost:9292')"
+    client << '      def connection.request(params, &block)'
+    client << '        response = super'
+    client << '        response.body = JSON.parse(response.body) rescue response.body'
+    client << '        response'
+    client << '      end'
+    client << '      connection'
     client << '    end'
     client << "  end\n"
 
     Endpoint.data.each do |key, datum|
-      name = if datum[:path].include?(':')
-        singular
-      else
+      if datum.keys == [:validates]
+        next
+      end
+
+      name = if datum[:method] == :get && !datum[:path].include?(':')
         plural
+      else
+        singular
       end
 
       endpoint_has_arguments = datum[:path].include?(':')
@@ -167,7 +190,7 @@ class Endpoint
         client << '    errors = []'
         client << '    options.keys.each do |key|'
         known_keys = datum[:accepts].keys
-        client << "      unless %w{#{known_keys.join(' ')}}.include?(key)"
+        client << "      unless %w{#{known_keys.join(' ')}}.include?(key.to_s)"
         client << '        errors << "`#{key}` is not a recognized option."'
         client << '      end'
         client << '    end'
@@ -210,9 +233,22 @@ class Endpoint
   end
 
   def self.to_md
-    docs = ["# #{name}"]
+    docs = ["# #{name}\n"]
+
+    endpoint, datum = Endpoint.data.detect {|key, value| value.keys == [:validates]}
+    validations = datum[:validates].values.flatten
+    unless validations.empty?
+      docs << "## Validations\n"
+      validations.each do |value|
+        docs << "* #{value[:description]}"
+      end
+      docs << ""
+    end
 
     Endpoint.data.each do |key, datum|
+      if datum.keys == [:validates]
+        next
+      end
       path = datum[:path]
 
       docs << "## #{datum[:method].upcase} #{path}\n"

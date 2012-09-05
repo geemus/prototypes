@@ -2,6 +2,18 @@ require './endpoint'
 
 class Apps < Endpoint
 
+  validates(:name, 'Name must start with a letter and can only contain lowercase letters, numbers, and dashes.') do
+    data['name'] =~ /\A[a-z][a-z0-9-]*\z/
+  end
+
+  validates(:name, 'Name must be between three and thirty characters long.') do
+    (3..30).include?(data['name'].length)
+  end
+
+  validates(:stack, 'Stack must be one of aspen-mri-1.8.6, bamboo-mri-1.9.2, bamboo-ree-1.8.7, bamboo-mri-1.9.1 or cedar.') do
+    %w{aspen-mri-1.8.6 bamboo-mri-1.9.2 bamboo-ree-1.8.7 bamboo-mri-1.9.1 cedar}.include?(data[:stack])
+  end
+
   delete('/:app') do
     description('Delete an app')
 
