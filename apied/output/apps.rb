@@ -37,7 +37,7 @@ class Client
   # Public: Create a new app.
   #
   # options - hash of options for operation (default: {})
-  #           :name - The String name for the app (default: randomly generated name).
+  #           :name  - The String name for the app (default: randomly generated name).
   #           :stack - The String technology stack to run app on (default: cedar).
   #
   def post_apps(options = {})
@@ -51,8 +51,8 @@ class Client
   # Public: Update an existing app.
   #
   # options - hash of options for operation (default: {})
-  #           :name - The new String name for app.
   #           :maintenance - The Boolean maintenance mode status.
+  #           :name        - The new String name for app.
   #
   def put_app(app, options = {})
     connection.request(

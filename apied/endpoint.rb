@@ -143,8 +143,11 @@ class Endpoint
       client << '  #'
       unless datum[:accepts].empty? && datum[:requires].empty?
         client << "  # options - hash of options for operation (default: {})"
-        (datum[:accepts].merge(datum[:requires])).each do |key, value|
-          client << "  #           :#{key} - #{value}"
+        keys = (datum[:accepts].keys + datum[:requires].keys).sort
+        longest_key = keys.map {|key| key.length}.max
+        keys.each do |key|
+          value = datum[:requires][key] || datum[:accepts][key]
+          client << "  #           :#{key.ljust(longest_key)} - #{value}"
         end
         client <<  '  #'
       end
