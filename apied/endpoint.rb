@@ -70,7 +70,6 @@ class Endpoint
           :accepts  => {},
           :method   => :#{method},
           :path     => full_path,
-          :requires => {}
         }
         if block_given?
           instance_eval(&block)
@@ -89,23 +88,13 @@ class Endpoint
     Endpoint.data[Endpoint.current][:accepts][name.to_s] = description
   end
 
-  def self.requires(name, description)
-    Endpoint.data[Endpoint.current][:requires][name.to_s] = description
-  end
-
   def self.response(&block)
     accepts   = Endpoint.data[Endpoint.current][:accepts]
-    requires  = Endpoint.data[Endpoint.current][:requires]
     Endpoint::Server.send(Endpoint.data[Endpoint.current][:method], Endpoint.data[Endpoint.current][:path]) do
       errors = []
       data.keys.each do |key|
-        unless (accepts.keys | requires.keys).include?(key)
+        unless accepts.keys.include?(key)
           errors << "`#{key}` is not a recognized option."
-        end
-        requires.keys.each do |key|
-          unless data.keys.include?(key)
-            errors << "`#{key}` is a required option."
-          end
         end
       end
       if errors.empty?
@@ -143,17 +132,16 @@ class Endpoint
       end
 
       endpoint_has_arguments = datum[:path].include?(':')
-      endpoint_has_options = !(datum[:accepts].empty? && datum[:requires].empty?)
+      endpoint_has_options = !datum[:accepts].empty?
 
       client << "  # Public: #{datum[:description]}"
       client << '  #'
       if endpoint_has_options
         client << "  # options - hash of options for operation (default: {})"
-        keys = (datum[:accepts].keys + datum[:requires].keys).sort
+        keys = datum[:accepts].keys.sort
         longest_key = keys.map {|key| key.length}.max
         keys.each do |key|
-          value = datum[:requires][key] || datum[:accepts][key]
-          client << "  #           :#{key.ljust(longest_key)} - #{value}"
+          client << "  #           :#{key.ljust(longest_key)} - #{datum[:accepts][key]}"
         end
         client <<  '  #'
       end
@@ -164,7 +152,7 @@ class Endpoint
       if endpoint_has_arguments
         segments = datum[:path].split('/').select {|segment| segment =~ /^:/}
         client.last << segments.map {|segment| segment[1..-1]}.join(', ')
-        unless datum[:accepts].empty? && datum[:requires].empty?
+        if endpoint_has_options
           client.last << ', '
         end
       end
@@ -178,18 +166,11 @@ class Endpoint
       if endpoint_has_options
         client << '    errors = []'
         client << '    options.keys.each do |key|'
-        known_keys = datum[:accepts].keys | datum[:requires].keys
+        known_keys = datum[:accepts].keys
         client << "      unless %w{#{known_keys.join(' ')}}.include?(key)"
         client << '        errors << "`#{key}` is not a recognized option."'
         client << '      end'
         client << '    end'
-        unless datum[:requires].empty?
-          client << "    %w{#{datum[:requires].keys.join(' ')}}.each do |key|"
-          client << '      unless options.keys.include?(key)'
-          client << '        errors << "`#{key}` is a required option."'
-          client << '      end'
-          client << '    end'
-        end
         client << '    unless errors.empty?'
         client << '      raise Errors.new(["Request Errors:"].concat(errors).join("\n"))'
         client << '    end'
@@ -240,18 +221,11 @@ class Endpoint
         docs << "*#{datum[:description]}*\n"
       end
 
-      unless datum[:accepts].empty? && datum[:requires].empty?
-        docs << "### Params\n"
-      end
-      [:accepts, :requires].each do |type|
-        unless datum[type].empty?
-          docs << "#### #{type.capitalize}\n"
-          datum[type].each do |key, value|
-            docs << "* `#{key}` - #{value}"
-          end
+      unless datum[:accepts].empty?
+        docs << "### Options"
+        datum[:accepts].each do |key, value|
+          docs << "* `#{key}` - #{value}"
         end
-      end
-      unless datum[:accepts].empty? && datum[:requires].empty?
         docs << ""
       end
 

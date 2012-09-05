@@ -71,10 +71,7 @@
 
 *Create a new app.*
 
-### Params
-
-#### Accepts
-
+### Options
 * `name` - The String name for the app (default: randomly generated name).
 * `stack` - The String technology stack to run app on (default: cedar).
 
@@ -102,10 +99,7 @@
 
 *Update an existing app.*
 
-### Params
-
-#### Accepts
-
+### Options
 * `name` - The new String name for app.
 * `maintenance` - The Boolean maintenance mode status.
 
