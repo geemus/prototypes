@@ -45,10 +45,26 @@ class Endpoint
     @current = new_current
   end
 
+  def self.plural
+    @plural ||= name.downcase
+  end
+
+  def self.plural=(new_plural)
+    @plural = new_plural
+  end
+
+  def self.singular
+    @singular ||= name.downcase[0...-1]
+  end
+
+  def self.singular=(new_singular)
+    @singular = new_singular
+  end
+
   %w{delete get post put}.each do |method|
     class_eval <<-DEF, __FILE__, __LINE__ + 1
       def self.#{method}(path = nil, &block)
-        full_path = '/' << [name.downcase, path].compact.join
+        full_path = '/' << [plural, path].compact.join
         Endpoint.current = ['#{method.upcase}', full_path].join(' ')
         Endpoint.data[Endpoint.current] = {
           :accepts  => {},
@@ -118,7 +134,11 @@ class Endpoint
     client << "  end\n"
 
     Endpoint.data.each do |key, datum|
-      endpoint = name.downcase
+      endpoint = if datum[:path].include?(':')
+        singular
+      else
+        plural
+      end
       client << "  # Public: #{datum[:description]}"
       client << '  #'
       unless datum[:accepts].empty? && datum[:requires].empty?

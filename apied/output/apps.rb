@@ -9,7 +9,7 @@ class Client
 
   # Public: Delete an app
   #
-  def delete_apps(app)
+  def delete_app(app)
     connection.request(
       :method => :delete,
       :path   => "/apps/#{app}"
@@ -27,7 +27,7 @@ class Client
 
   # Public: Get details for an app.
   #
-  def get_apps(app)
+  def get_app(app)
     connection.request(
       :method => :get,
       :path   => "/apps/#{app}"
@@ -54,7 +54,7 @@ class Client
   #           :name - The new String name for app.
   #           :maintenance - The Boolean maintenance mode status.
   #
-  def put_apps(app, options = {})
+  def put_app(app, options = {})
     connection.request(
       :body   => options,
       :method => :put,
