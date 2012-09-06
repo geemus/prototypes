@@ -1,0 +1,137 @@
+<h1>Apps</h1>
+
+<h2>Validations</h2>
+
+<ul>
+<li>Name must start with a letter and can only contain lowercase letters, numbers, and dashes.</li>
+<li>Name must be between three and thirty characters long.</li>
+<li>Stack must be one of aspen-mri-1.8.6, bamboo-mri-1.9.2, bamboo-ree-1.8.7, bamboo-mri-1.9.1 or cedar.</li>
+</ul>
+
+<h2>DELETE /apps/:app</h2>
+
+<p><em>Delete an app</em></p>
+
+<h3>Sample Response</h3>
+
+<pre><code>{
+  &quot;id&quot;: &quot;app123@heroku.com&quot;,
+  &quot;owner_id&quot;: &quot;user123@heroku.com&quot;,
+  &quot;name&quot;: &quot;myapp&quot;,
+  &quot;created_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+  &quot;released_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+  &quot;repo_size&quot;: 1024,
+  &quot;slug_size&quot;: 1450,
+  &quot;stack&quot;: &quot;cedar&quot;,
+  &quot;web_url&quot;: &quot;http://myapp.herokuapp.com&quot;,
+  &quot;git_url&quot;: &quot;git@heroku.com:myapp.git&quot;,
+  &quot;buildpack_provided_description&quot;: &quot;Ruby/Rails&quot;,
+  &quot;maintenance&quot;: false,
+}
+</code></pre>
+
+<h2>GET /apps</h2>
+
+<p><em>Get a listing of your apps.</em></p>
+
+<h3>Sample Response</h3>
+
+<pre><code>[
+  {
+    &quot;id&quot;: &quot;app123@heroku.com&quot;,
+    &quot;owner_id&quot;: &quot;user123@heroku.com&quot;,
+    &quot;name&quot;: &quot;myapp&quot;,
+    &quot;created_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+    &quot;released_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+    &quot;repo_size&quot;: 1024,
+    &quot;slug_size&quot;: 1450,
+    &quot;stack&quot;: &quot;cedar&quot;,
+    &quot;web_url&quot;: &quot;http://myapp.herokuapp.com&quot;,
+    &quot;git_url&quot;: &quot;git@heroku.com:myapp.git&quot;,
+    &quot;buildpack_provided_description&quot;: &quot;Ruby/Rails&quot;,
+    &quot;maintenance&quot;: false,
+  }
+]
+</code></pre>
+
+<h2>GET /apps/:app</h2>
+
+<p><em>Get details for an app.</em></p>
+
+<h3>Sample Response</h3>
+
+<pre><code>{
+  &quot;id&quot;: &quot;app123@heroku.com&quot;,
+  &quot;owner_id&quot;: &quot;user123@heroku.com&quot;,
+  &quot;name&quot;: &quot;myapp&quot;,
+  &quot;created_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+  &quot;released_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+  &quot;repo_size&quot;: 1024,
+  &quot;slug_size&quot;: 1450,
+  &quot;stack&quot;: &quot;cedar&quot;,
+  &quot;web_url&quot;: &quot;http://myapp.herokuapp.com&quot;,
+  &quot;git_url&quot;: &quot;git@heroku.com:myapp.git&quot;,
+  &quot;buildpack_provided_description&quot;: &quot;Ruby/Rails&quot;,
+  &quot;maintenance&quot;: false,
+}
+</code></pre>
+
+<h2>POST /apps</h2>
+
+<p><em>Create a new app.</em></p>
+
+<h3>Options</h3>
+
+<ul>
+<li><code>name</code> - The String name for the app (default: randomly generated name).</li>
+<li><code>stack</code> - The String technology stack to run app on (default: cedar).</li>
+</ul>
+
+<h3>Sample Response</h3>
+
+<pre><code>[
+  {
+    &quot;id&quot;: &quot;app123@heroku.com&quot;,
+    &quot;owner_id&quot;: &quot;user123@heroku.com&quot;,
+    &quot;name&quot;: &quot;myapp&quot;,
+    &quot;created_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+    &quot;released_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+    &quot;repo_size&quot;: 1024,
+    &quot;slug_size&quot;: 1450,
+    &quot;stack&quot;: &quot;cedar&quot;,
+    &quot;web_url&quot;: &quot;http://myapp.herokuapp.com&quot;,
+    &quot;git_url&quot;: &quot;git@heroku.com:myapp.git&quot;,
+    &quot;buildpack_provided_description&quot;: &quot;Ruby/Rails&quot;,
+    &quot;maintenance&quot;: false,
+  }
+]
+</code></pre>
+
+<h2>PUT /apps/:app</h2>
+
+<p><em>Update an existing app.</em></p>
+
+<h3>Options</h3>
+
+<ul>
+<li><code>name</code> - The new String name for app.</li>
+<li><code>maintenance</code> - The Boolean maintenance mode status.</li>
+</ul>
+
+<h3>Sample Response</h3>
+
+<pre><code>{
+  &quot;id&quot;: &quot;app123@heroku.com&quot;,
+  &quot;owner_id&quot;: &quot;user123@heroku.com&quot;,
+  &quot;name&quot;: &quot;myapp&quot;,
+  &quot;created_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+  &quot;released_at&quot;: &quot;2012-01-01T12:00:00-00:00&quot;,
+  &quot;repo_size&quot;: 1024,
+  &quot;slug_size&quot;: 1450,
+  &quot;stack&quot;: &quot;cedar&quot;,
+  &quot;web_url&quot;: &quot;http://myapp.herokuapp.com&quot;,
+  &quot;git_url&quot;: &quot;git@heroku.com:myapp.git&quot;,
+  &quot;buildpack_provided_description&quot;: &quot;Ruby/Rails&quot;,
+  &quot;maintenance&quot;: false,
+}
+</code></pre>
