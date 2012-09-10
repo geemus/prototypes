@@ -28,23 +28,16 @@ def stretches(stretches)
   say('relax')
 end
 
-stretches = case ARGV.pop
-when "trifecta"
-  [
-    ["bridge", 20],
-    ["l-seat", 10],
-    ["l-seat", 10],
-    ["twist",  20],
-    ["twist",  20]
-  ]
-else
-  [
-    ["pike",    120],
-    ["left",    150],
-    ["right",   150],
-    ["pancake", 150],
-    ["middle",  150]
-  ]
-end
+stretches = [
+  ["bridge",   40],
+  ["l-seat",   10],
+  ["l-seat",   10],
+  ["twist",    45],
+  ["twist",    45],
+  ["pike",    120],
+  ["left",    150],
+  ["right",   150],
+  ["middle",  150]
+]
 
 stretches(stretches)
