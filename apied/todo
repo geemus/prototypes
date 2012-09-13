@@ -1,0 +1,11 @@
+? sample generation
+  ? define code blocks which say what to do and/or what to output
+  ? fixtures
+
+conditional/internal things, ie a nodoc flag where things are checked but not documented and/or in client
+  ? perhaps determine based on whether validation/accepts are private/public
+
+versioning
+
+? change to use Endpoint::Base which inherits from Sinatra::Base
+  ? eases adoption, but requires changing dsl to accomodate
