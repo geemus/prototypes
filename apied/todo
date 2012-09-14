@@ -9,3 +9,5 @@ versioning
 
 ? change to use Endpoint::Base which inherits from Sinatra::Base
   ? eases adoption, but requires changing dsl to accomodate
+
+? what about approaching this from a model perspective and generating routes
