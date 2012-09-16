@@ -4,6 +4,9 @@
 
 * Name must start with a letter and can only contain lowercase letters, numbers, and dashes.
 * Name must be between three and thirty characters long.
+* Name must start with a letter and can only contain lowercase letters, numbers, and dashes.
+* Name must be between three and thirty characters long.
+* Stack must be one of aspen-mri-1.8.6, bamboo-mri-1.9.2, bamboo-ree-1.8.7, bamboo-mri-1.9.1 or cedar.
 * Stack must be one of aspen-mri-1.8.6, bamboo-mri-1.9.2, bamboo-ree-1.8.7, bamboo-mri-1.9.1 or cedar.
 
 ## DELETE /apps/:app
