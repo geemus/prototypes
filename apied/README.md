@@ -30,6 +30,7 @@ Versioning
 Routes
 ------
 
+```
 DELETE  /objects/:id  # delete object by id
 GET     /objects      # listing of objects
 GET     /objects/:id  # object data by id
@@ -39,3 +40,4 @@ OPTIONS /objects/:id  # Allows header with %w{DELETE GET HEAD OPTIONS PATCH PUT}
 PATCH   /objects/:id  # object update by id
 POST    /objects      # object creation without id (returns representation including generated id)
 PUT     /objects/:id  # object replacement by id
+```
