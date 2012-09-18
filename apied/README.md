@@ -40,4 +40,14 @@ OPTIONS /objects/:id  # Allows header with %w{DELETE GET HEAD OPTIONS PATCH PUT}
 PATCH   /objects/:id  # object update by id
 POST    /objects      # object creation without id (returns representation including generated id)
 PUT     /objects/:id  # object replacement by id
+
+? Batch operations
+  takes a hash (where keys are ids and values are the bodies for that id)
+  in the case of delete it simply takes an array
+  returns a hash, with key ids and body values for what each request would do individually
+  naively this would simply call the singular action many times serially, but might allow for optimized implementations
+DELETE /objects       # delete an array of objects by id
+PATCH  /objects       # patch several objects, with hash data of id keys and body values
+POST   /objects       # create one or more objects without id, takes either a hash for one object or an array for many
+PUT    /objects       # replace several objects, with hash data of id keys and body values
 ```
