@@ -51,3 +51,17 @@ PATCH  /objects       # patch several objects, with hash data of id keys and bod
 POST   /objects       # create one or more objects without id, takes either a hash for one object or an array for many
 PUT    /objects       # replace several objects, with hash data of id keys and body values
 ```
+
+Rack Notes
+----------
+
+Someday/Maybe:
+* Rack::BasicAuth (rack/rack)
+* Rack::ConditionalGet (rack/rack)
+* Rack::Locale (rack/contrib)
+* Rack::Profiler (rack/contrib)
+* https://github.com/rtomayko/rack-cache
+* https://github.com/datagraph/rack-throttle
+
+See Also:
+* http://getcloudkit.com/
