@@ -42,7 +42,7 @@ POST    /objects      # object creation without id (returns representation inclu
 PUT     /objects/:id  # object replacement by id
 
 ? Batch operations
-  takes a hash (where keys are ids and values are the bodies for that id)
+  takes an array of hashes (where keys are ids and values are the bodies for that id)
   in the case of delete it simply takes an array
   returns a hash, with key ids and body values for what each request would do individually
   naively this would simply call the singular action many times serially, but might allow for optimized implementations
@@ -65,3 +65,10 @@ Someday/Maybe:
 
 See Also:
 * http://getcloudkit.com/
+
+Model actions should return, one of:
+
+* An Array with three elements: [status (Fixnum), headers (Hash), response body (responds to #each)]
+* An Array with two elements: [status (Fixnum), response body (responds to #each)]
+* An object that responds to #each and passes nothing but strings to the given block
+* A Fixnum representing the status code
