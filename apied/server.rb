@@ -1,12 +1,23 @@
 class Server < Sinatra::Base
 
-  delete('/apps') do
-    data = if (body = request.body.read) && !body.empty?
+  def batch_data
+    @batch_data ||= if (body = request.body.read) && !body.empty?
       JSON.parse(body)
     else
       []
     end
-    model.delete(data)
+  end
+
+  def data
+    @data ||= if (body = request.body.read) && !body.empty?
+      JSON.parse(body)
+    else
+      {}
+    end
+  end
+
+  delete('/apps') do
+    model.delete(batch_data)
   end
 
   delete('/apps/:id') do
@@ -34,47 +45,22 @@ class Server < Sinatra::Base
   end
 
   patch('/apps') do
-    data = if (body = request.body.read) && !body.empty?
-      JSON.parse(body)
-    else
-      []
-    end
-    model.update(data)
+    model.update(batch_data)
   end
 
   patch('/apps/:id') do
-    data = if (body = request.body.read) && !body.empty?
-      JSON.parse(body)
-    else
-      {}
-    end
     model.update([{params[:id] => data}])
   end
 
   post('/apps') do
-    data = if (body = request.body.read) && !body.empty?
-      JSON.parse(body)
-    else
-      {}
-    end
     model.create(data)
   end
 
   put('/apps') do
-    data = if (body = request.body.read) && !body.empty?
-      JSON.parse(body)
-    else
-      []
-    end
-    model.replace(data)
+    model.replace(batch_data)
   end
 
   put('/apps/:id') do
-    data = if (body = request.body.read) && !body.empty?
-      JSON.parse(body)
-    else
-      {}
-    end
     model.replace([{params[:id] => data}])
   end
 

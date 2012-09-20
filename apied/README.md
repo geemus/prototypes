@@ -72,3 +72,5 @@ Model actions should return, one of:
 * An Array with two elements: [status (Fixnum), response body (responds to #each)]
 * An object that responds to #each and passes nothing but strings to the given block
 * A Fixnum representing the status code
+
+Create a base model that defaults to 404s and stuff and then override methods in child.
