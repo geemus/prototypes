@@ -1,5 +1,9 @@
 # encoding: utf-8
 
-require("./endpoint")
+#require("./endpoint")
 
-run Endpoint::Server
+#run Endpoint::Server
+
+require('./dd')
+
+run DD::Server

@@ -1,3 +1,7 @@
+DD
+  move model stuff into adapters (ie a sequel adapter), modify with before/after filters (like middleware)
+  integrate schema stuff
+
 ? sample generation
   ? define code blocks which say what to do and/or what to output
   ? fixtures
