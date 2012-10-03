@@ -10,6 +10,7 @@ conditional/internal things, ie a nodoc flag where things are checked but not do
   ? perhaps determine based on whether validation/accepts are private/public
 
 versioning
+  ? purposefully introduce increasingly large latency as time since deprecation increases
 
 ? change to use Endpoint::Base which inherits from Sinatra::Base
   ? eases adoption, but requires changing dsl to accomodate
