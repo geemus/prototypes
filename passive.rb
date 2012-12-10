@@ -67,7 +67,11 @@ REGULAR_PASSIVES = %w{
   \w+ed
 }
 
-string = ARGV.join(" ")
+string = if $stdin.isatty
+  ARGV.join(" ")
+else
+  $stdin.read
+end
 
 highlighted = string.gsub(/(^|\s)(#{(IRREGULAR_PASSIVES + REGULAR_PASSIVES).join("|")})(\s|$)/) {"#{$1}[negative]#{$2}[/]#{$3}"}
 if highlighted == string
