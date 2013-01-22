@@ -1,6 +1,6 @@
 # see also: http://en.wikipedia.org/wiki/Heart_rate
 
-@age, @rest = 30, 60
+@age, @rest = 30, 80
 
 # max based on Oakland University nonlinear equation
 # HRmax = 191.5 - (0.007 X age^2)
