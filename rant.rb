@@ -52,9 +52,10 @@ class Rant
     112 => :usb_string_write_fail
   }
 
-  attr_accessor :heart_rate, :offset
+  attr_accessor :heart_beat_count, :heart_beat_times, :heart_rate
 
   def initialize(device = '/dev/tty.usbserial-A800ekni')
+    @heart_beat_times = []
     @port = SerialPort.new(device, 4800, 8, 1, SerialPort::NONE)
 
     # GARMIN
@@ -73,7 +74,8 @@ class Rant
     send_message(:set_channel_id, [0x00, 0x00, 0x00, 0x78, 0x00])
     receive_message
 
-    send_message(:set_channel_period, [0x00, 0x1F, 0x86])
+    # channel period - 8070 counts (~4.06 Hz, 4 messages/second) little endian
+    send_message(:set_channel_period, [0x00, 0x7c, 0x1F])
     receive_message
 
     send_message(:set_channel_search_timeout, [0x00, 0xFF])
@@ -113,11 +115,23 @@ class Rant
       data << @port.getbyte
     end
     checksum = @port.getbyte
-    if data == [0x0, 0x1, 0x2]
-    elsif type == 0x4E
-      self.offset = data[-2]
+    if type == 0x4E
+      self.heart_beat_times << (data[-3] * 256) + data[-4]
+      self.heart_beat_count = data[-2]
       self.heart_rate = data[-1]
-      #puts "offset => #{self.offset}, heartrate => #{self.heart_rate}"
+      if ENV['DEBUG']
+        if self.heart_beat_times.length == 1
+          puts "count => #{self.heart_beat_count}, rate => #{self.heart_rate}, time => #{self.heart_beat_times.last}"
+        else
+          diff = self.heart_beat_times[-1] - self.heart_beat_times[-2]
+          if diff < 0
+            diff += 65536
+          end
+          ms = diff * 0.9765625 # 1024/1000 to convert from 1/1024 units to ms
+          puts "count => #{self.heart_beat_count}, rate => #{self.heart_rate}, time => #{self.heart_beat_times.last}, diff => #{diff}, ms => #{ms}"
+        end
+      end
+    elsif data == [0x0, 0x1, 0x2]
     elsif type == MESSAGES[:channel_event]
       channel, message_id, message_code = data
       puts "channel: #{channel}, message_id => #{message_id}, message: #{RESPONSES[message_code]}"
@@ -134,19 +148,26 @@ end
 
 if __FILE__ == $0
 
-  rant = Rant.new
+  begin
 
-  start = Time.now
+    rant = Rant.new
+    start = Time.now
 
-  while true
-    rant.receive_message
-    elapsed = (Time.now - start).to_i
-    minutes = (elapsed / 60).to_s.rjust(2, "0")
-    seconds = (elapsed % 60).to_s.rjust(2, "0")
-    heart_rate = rant.heart_rate.to_s.rjust(3, "0")
-    Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate}  ", 15)
+    STDOUT.sync=true
+
+    while true
+      rant.receive_message
+      unless ENV['DEBUG']
+        elapsed = (Time.now - start).to_i
+        minutes = (elapsed / 60).to_s.rjust(2, "0")
+        seconds = (elapsed % 60).to_s.rjust(2, "0")
+        heart_rate = rant.heart_rate.to_s.rjust(3, "0")
+        Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate}  ", 15)
+      end
+    end
+
+  rescue Interrupt
+    rant.close
   end
-
-  rant.close
 
 end
