@@ -116,27 +116,26 @@ class Rant
     end
     checksum = @port.getbyte
     if type == 0x4E
-      count_diff = data[-2] - self.heart_beat_count
+      # account for wrapping
+      count_diff = if data[-2] >= self.heart_beat_count
+        data[-2] - self.heart_beat_count
+      else
+        255 - self.heart_beat_count + data[-2]
+      end
+      # skip the datapoint if it is a duplicate
       unless count_diff == 0
-        if count_diff == 255 # account for wrapping
-          count_diff = 1
-        end
-        self.heart_beat_times << (data[-3] * 256) + data[-4] # data is little endian
         self.heart_beat_count = data[-2]
+        self.heart_beat_times << (data[-3] * 256) + data[-4] # data is little endian
         self.heart_rate = data[-1]
-        if ENV['DEBUG']
-          if self.heart_beat_times.length == 1
-            puts "count => #{self.heart_beat_count}, rate => #{self.heart_rate}"
-          else
-            interval = self.heart_beat_times[-1] - self.heart_beat_times[-2]
-            if interval < 0
-              interval += 65536
-            end
-            interval /= count_diff # average across multiple beats as needed
-            interval *= 0.9765625 # 1024/1000 to convert from 1/1024 units to ms
-            self.heart_beat_intervals << interval.round # round to whole ms
-            puts "count => #{self.heart_beat_count}, interval => #{self.heart_beat_intervals.last} ms, rate => #{self.heart_rate}"
+
+        if self.heart_beat_times.length > 1
+          interval = self.heart_beat_times[-1] - self.heart_beat_times[-2]
+          if interval < 0
+            interval += 65536
           end
+          interval /= count_diff # average across multiple beats as needed
+          interval *= 0.9765625 # 1024/1000 to convert from 1/1024 units to ms
+          self.heart_beat_intervals << interval.round # round to whole ms
         end
       end
     elsif data == [0x0, 0x1, 0x2] # rx fail, can be safely ignored and are quite noisy
@@ -170,7 +169,8 @@ if __FILE__ == $0
         minutes = (elapsed / 60).to_s.rjust(2, "0")
         seconds = (elapsed % 60).to_s.rjust(2, "0")
         heart_rate = rant.heart_rate.to_s.rjust(3, "0")
-        Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate}  ", 15)
+        heart_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
+        Formatador.redisplay("#{minutes}:#{seconds}  #{heart_interval}ms  #{heart_rate}", 20)
       end
     end
 
