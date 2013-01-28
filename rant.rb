@@ -164,14 +164,12 @@ if __FILE__ == $0
 
     while true
       rant.receive_message
-      unless ENV['DEBUG']
-        elapsed = (Time.now - start).to_i
-        minutes = (elapsed / 60).to_s.rjust(2, "0")
-        seconds = (elapsed % 60).to_s.rjust(2, "0")
-        heart_rate = rant.heart_rate.to_s.rjust(3, "0")
-        heart_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
-        Formatador.redisplay("#{minutes}:#{seconds}  #{heart_interval}ms  #{heart_rate}", 20)
-      end
+      elapsed = (Time.now - start).to_i
+      minutes = (elapsed / 60).to_s.rjust(2, "0")
+      seconds = (elapsed % 60).to_s.rjust(2, "0")
+      heart_rate = rant.heart_rate.to_s.rjust(3, "0")
+      heart_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
+      Formatador.redisplay("#{minutes}:#{seconds}  #{heart_interval}ms  #{heart_rate}", 20)
     end
 
   rescue Interrupt
