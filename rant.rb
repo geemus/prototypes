@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'formatador'
+require 'ruby-standard-deviation'
 require 'serialport'
 
 class Rant
@@ -168,8 +169,13 @@ if __FILE__ == $0
       minutes = (elapsed / 60).to_s.rjust(2, "0")
       seconds = (elapsed % 60).to_s.rjust(2, "0")
       heart_rate = rant.heart_rate.to_s.rjust(3, "0")
-      heart_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
-      Formatador.redisplay("#{minutes}:#{seconds}  #{heart_interval}ms  #{heart_rate}", 20)
+      # SDNN HRV
+      heart_rate_variability = if rant.heart_beat_intervals.length > 1
+        rant.heart_beat_intervals.stdev.round.to_s.rjust(3, "0")
+      else
+        "000"
+      end
+      Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate_variability}  #{heart_rate}", 20)
     end
 
   rescue Interrupt
