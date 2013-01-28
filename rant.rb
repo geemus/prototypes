@@ -52,10 +52,10 @@ class Rant
     112 => :usb_string_write_fail
   }
 
-  attr_accessor :heart_beat_count, :heart_beat_times, :heart_rate
+  attr_accessor :heart_beat_count, :heart_beat_intervals, :heart_beat_times, :heart_rate
 
   def initialize(device = '/dev/tty.usbserial-A800ekni')
-    @heart_beat_times = []
+    @heart_beat_count, @heart_beat_intervals, @heart_beat_times, @heart_rate = -1, [], [], -1
     @port = SerialPort.new(device, 4800, 8, 1, SerialPort::NONE)
 
     # GARMIN
@@ -116,22 +116,30 @@ class Rant
     end
     checksum = @port.getbyte
     if type == 0x4E
-      self.heart_beat_times << (data[-3] * 256) + data[-4]
-      self.heart_beat_count = data[-2]
-      self.heart_rate = data[-1]
-      if ENV['DEBUG']
-        if self.heart_beat_times.length == 1
-          puts "count => #{self.heart_beat_count}, rate => #{self.heart_rate}, time => #{self.heart_beat_times.last}"
-        else
-          diff = self.heart_beat_times[-1] - self.heart_beat_times[-2]
-          if diff < 0
-            diff += 65536
+      count_diff = data[-2] - self.heart_beat_count
+      unless count_diff == 0
+        if count_diff == 255 # account for wrapping
+          count_diff = 1
+        end
+        self.heart_beat_times << (data[-3] * 256) + data[-4] # data is little endian
+        self.heart_beat_count = data[-2]
+        self.heart_rate = data[-1]
+        if ENV['DEBUG']
+          if self.heart_beat_times.length == 1
+            puts "count => #{self.heart_beat_count}, rate => #{self.heart_rate}"
+          else
+            interval = self.heart_beat_times[-1] - self.heart_beat_times[-2]
+            if interval < 0
+              interval += 65536
+            end
+            interval /= count_diff # average across multiple beats as needed
+            interval *= 0.9765625 # 1024/1000 to convert from 1/1024 units to ms
+            self.heart_beat_intervals << interval.round # round to whole ms
+            puts "count => #{self.heart_beat_count}, interval => #{self.heart_beat_intervals.last} ms, rate => #{self.heart_rate}"
           end
-          ms = diff * 0.9765625 # 1024/1000 to convert from 1/1024 units to ms
-          puts "count => #{self.heart_beat_count}, rate => #{self.heart_rate}, time => #{self.heart_beat_times.last}, diff => #{diff}, ms => #{ms}"
         end
       end
-    elsif data == [0x0, 0x1, 0x2]
+    elsif data == [0x0, 0x1, 0x2] # rx fail, can be safely ignored and are quite noisy
     elsif type == MESSAGES[:channel_event]
       channel, message_id, message_code = data
       puts "channel: #{channel}, message_id => #{message_id}, message: #{RESPONSES[message_code]}"
