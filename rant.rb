@@ -53,10 +53,10 @@ class Rant
     112 => :usb_string_write_fail
   }
 
-  attr_accessor :heart_beat_count, :heart_beat_intervals, :heart_beat_times, :heart_rate
+  attr_accessor :heart_beat_count, :heart_beat_intervals, :heart_beat_times, :heart_rate, :heart_rate_trend
 
   def initialize(device = '/dev/tty.usbserial-A800ekni')
-    @heart_beat_count, @heart_beat_intervals, @heart_beat_times, @heart_rate = -1, [], [], -1
+    @heart_beat_count, @heart_beat_intervals, @heart_beat_times, @heart_rate, @heart_rate_trend = -1, [], [], -1, '='
     @port = SerialPort.new(device, 4800, 8, 1, SerialPort::NONE)
 
     # GARMIN
@@ -127,6 +127,14 @@ class Rant
       unless count_diff == 0
         self.heart_beat_count = data[-2]
         self.heart_beat_times << (data[-3] * 256) + data[-4] # data is little endian
+        self.heart_rate_trend = case data[-1] <=> self.heart_rate
+        when -1
+          '-'
+        when  0
+          '='
+        when  1
+          '+'
+        end
         self.heart_rate = data[-1]
 
         if self.heart_beat_times.length > 1
@@ -175,7 +183,7 @@ if __FILE__ == $0
       else
         "000"
       end
-      Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate_variability}  #{heart_rate}", 20)
+      Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate_variability}  #{heart_rate}  #{rant.heart_rate_trend}", 32)
     end
 
   rescue Interrupt
