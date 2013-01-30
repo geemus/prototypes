@@ -178,13 +178,14 @@ if __FILE__ == $0
       seconds = (elapsed % 60).to_s.rjust(2, "0")
       breathing = (elapsed % 12 + 1).to_s.rjust(2, "0")
       heart_rate = rant.heart_rate.to_s.rjust(3, "0")
+      interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
       # SDNN HRV
       heart_rate_variability = if rant.heart_beat_intervals.length > 1
         rant.heart_beat_intervals.stdev.round.to_s.rjust(3, "0")
       else
         "000"
       end
-      Formatador.redisplay("#{minutes}:#{seconds}  #{heart_rate_variability}  #{heart_rate}  #{rant.heart_rate_trend}  #{breathing}", 32)
+      Formatador.redisplay("#{interval}  #{heart_rate_variability}  |  #{heart_rate}  #{rant.heart_rate_trend}  |  #{minutes}:#{seconds}  #{breathing}", 32)
     end
 
   rescue Interrupt
