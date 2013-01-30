@@ -167,12 +167,12 @@ if __FILE__ == $0
     while true
       rant.receive_message
 
-      heart_beat_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
+      heart_beat_interval = rant.heart_beat_intervals.last.to_s.rjust(3, "0")
       heart_beat_intervals_stdev = if rant.heart_beat_intervals.length > 1
         # SDNN HRV
-        rant.heart_beat_intervals.stdev.round.to_s.rjust(3, "0")
+        rant.heart_beat_intervals.stdev.round.to_s.rjust(2, "0")
       else
-        "000"
+        "00"
       end
 
       heart_beat_rate = rant.heart_beat_rates.last.to_s.rjust(3, "0")
