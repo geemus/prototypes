@@ -53,10 +53,10 @@ class Rant
     112 => :usb_string_write_fail
   }
 
-  attr_accessor :heart_beat_count, :heart_beat_intervals, :heart_beat_times, :heart_rate, :heart_rate_trend
+  attr_accessor :heart_beat_count, :heart_beat_intervals, :heart_beat_times, :heart_beat_rates
 
   def initialize(device = '/dev/tty.usbserial-A800ekni')
-    @heart_beat_count, @heart_beat_intervals, @heart_beat_times, @heart_rate, @heart_rate_trend = -1, [], [], -1, '='
+    @heart_beat_count, @heart_beat_intervals, @heart_beat_times, @heart_beat_rates = -1, [], [], []
     @port = SerialPort.new(device, 4800, 8, 1, SerialPort::NONE)
 
     # GARMIN
@@ -127,15 +127,7 @@ class Rant
       unless count_diff == 0
         self.heart_beat_count = data[-2]
         self.heart_beat_times << (data[-3] * 256) + data[-4] # data is little endian
-        self.heart_rate_trend = case data[-1] <=> self.heart_rate
-        when -1
-          '-'
-        when  0
-          '='
-        when  1
-          '+'
-        end
-        self.heart_rate = data[-1]
+        self.heart_beat_rates << data[-1]
 
         if self.heart_beat_times.length > 1
           interval = self.heart_beat_times[-1] - self.heart_beat_times[-2]
@@ -173,19 +165,28 @@ if __FILE__ == $0
 
     while true
       rant.receive_message
-      elapsed = (Time.now - start).to_i
-      minutes = (elapsed / 60).to_s.rjust(2, "0")
-      seconds = (elapsed % 60).to_s.rjust(2, "0")
-      breathing = (elapsed % 12 + 1).to_s.rjust(2, "0")
-      heart_rate = rant.heart_rate.to_s.rjust(3, "0")
-      interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
-      # SDNN HRV
-      heart_rate_variability = if rant.heart_beat_intervals.length > 1
+
+      heart_beat_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
+      heart_beat_intervals_stdev = if rant.heart_beat_intervals.length > 1
+        # SDNN HRV
         rant.heart_beat_intervals.stdev.round.to_s.rjust(3, "0")
       else
         "000"
       end
-      Formatador.redisplay("#{interval}  #{heart_rate_variability}  |  #{heart_rate}  #{rant.heart_rate_trend}  |  #{minutes}:#{seconds}  #{breathing}", 32)
+
+      heart_beat_rate = rant.heart_beat_rates.last.to_s.rjust(3, "0")
+      heart_beat_rates_stdev = if rant.heart_beat_rates.length > 1
+        rant.heart_beat_rates.stdev.round.to_s.rjust(2, "0")
+      else
+        "00"
+      end
+
+      elapsed = (Time.now - start).to_i
+      minutes = (elapsed / 60).to_s.rjust(2, "0")
+      seconds = (elapsed % 60).to_s.rjust(2, "0")
+      breathing = (elapsed % 12 + 1).to_s.rjust(2, "0")
+
+      Formatador.redisplay("#{heart_beat_interval}  #{heart_beat_intervals_stdev}  |  #{heart_beat_rate}  #{heart_beat_rates_stdev}  |  #{minutes}:#{seconds}  #{breathing}", 32)
     end
 
   rescue Interrupt
