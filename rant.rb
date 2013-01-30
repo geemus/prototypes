@@ -16,6 +16,7 @@ class Rant
     # Control
     :system_reset       => 0x4A,
     :open_channel       => 0x4B,
+    :close_channel      => 0x4B,
     :request_message    => 0x4D,
     # Channel Event
     :channel_event => 0x40,
@@ -191,6 +192,12 @@ if __FILE__ == $0
 
   rescue Interrupt
     rant.close
+    puts
+    puts("#{minutes}:#{seconds}")
+    puts(rant.heart_beat_intervals.join(','))
+    puts(heart_beat_intervals_stdev)
+    puts(rant.heart_beat_rates.join(','))
+    puts(heart_beat_rates_stdev)
   end
 
 end
