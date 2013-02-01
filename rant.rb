@@ -1,3 +1,5 @@
+# TODO: https://github.com/larskanis/libusb
+
 require 'rubygems'
 require 'formatador'
 require 'serialport'
