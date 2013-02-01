@@ -185,9 +185,13 @@ if __FILE__ == $0
       elapsed = (Time.now - start).to_i
       minutes = (elapsed / 60).to_s.rjust(2, "0")
       seconds = (elapsed % 60).to_s.rjust(2, "0")
-      breathing = (elapsed % 12 + 1).to_s.rjust(2, "0")
+      breathing = if elapsed % 12 < 5
+        '*' * (2 * (elapsed % 12))
+      else
+        '*' * (12 - (elapsed % 12))
+      end
 
-      Formatador.redisplay("#{minutes}:#{seconds}  #{breathing}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}", 32)
+      Formatador.redisplay("#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{breathing}", 64)
     end
 
   rescue Interrupt
