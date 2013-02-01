@@ -166,8 +166,6 @@ if __FILE__ == $0
     while true
       rant.receive_message
 
-      heart_beat_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
-
       # RMSSD the square root of the mean squared difference of successive NNs
       heart_beat_intervals_ln_rmssd = if rant.heart_beat_intervals.length > 1
         ssd = 0
@@ -189,7 +187,7 @@ if __FILE__ == $0
       seconds = (elapsed % 60).to_s.rjust(2, "0")
       breathing = (elapsed % 12 + 1).to_s.rjust(2, "0")
 
-      Formatador.redisplay("#{minutes}:#{seconds}  #{breathing}  |  #{heart_beat_interval}  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}", 32)
+      Formatador.redisplay("#{minutes}:#{seconds}  #{breathing}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}", 32)
     end
 
   rescue Interrupt
