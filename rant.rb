@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'formatador'
-require 'ruby-standard-deviation'
 require 'serialport'
 
 class Rant
@@ -167,27 +166,30 @@ if __FILE__ == $0
     while true
       rant.receive_message
 
-      heart_beat_interval = rant.heart_beat_intervals.last.to_s.rjust(3, "0")
-      heart_beat_intervals_stdev = if rant.heart_beat_intervals.length > 1
-        # SDNN HRV
-        rant.heart_beat_intervals.stdev.round.to_s.rjust(2, "0")
+      heart_beat_interval = rant.heart_beat_intervals.last.to_s.rjust(4, "0")
+
+      # RMSSD the square root of the mean squared difference of successive NNs
+      heart_beat_intervals_ln_rmssd = if rant.heart_beat_intervals.length > 1
+        ssd = 0
+        (rant.heart_beat_intervals.length - 1).times do |i|
+          diff = rant.heart_beat_intervals[i] - rant.heart_beat_intervals[i+1]
+          ssd += diff * diff
+        end
+        mssd = ssd / rant.heart_beat_intervals.length.to_f
+        ln_rmssd = Math.log(Math.sqrt(mssd))
+        format("%0.3f", ln_rmssd)
       else
-        "00"
+        "0.000"
       end
 
       heart_beat_rate = rant.heart_beat_rates.last.to_s.rjust(3, "0")
-      heart_beat_rates_stdev = if rant.heart_beat_rates.length > 1
-        rant.heart_beat_rates.stdev.round.to_s.rjust(2, "0")
-      else
-        "00"
-      end
 
       elapsed = (Time.now - start).to_i
       minutes = (elapsed / 60).to_s.rjust(2, "0")
       seconds = (elapsed % 60).to_s.rjust(2, "0")
       breathing = (elapsed % 12 + 1).to_s.rjust(2, "0")
 
-      Formatador.redisplay("#{heart_beat_interval}  #{heart_beat_intervals_stdev}  |  #{heart_beat_rate}  #{heart_beat_rates_stdev}  |  #{minutes}:#{seconds}  #{breathing}", 32)
+      Formatador.redisplay("#{minutes}:#{seconds}  #{breathing}  |  #{heart_beat_interval}  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}", 32)
     end
 
   rescue Interrupt
@@ -195,9 +197,9 @@ if __FILE__ == $0
     puts
     puts("#{minutes}:#{seconds}")
     puts(rant.heart_beat_intervals.join(','))
-    puts(heart_beat_intervals_stdev)
+    puts(heart_beat_intervals_ln_rmssd)
     puts(rant.heart_beat_rates.join(','))
-    puts(heart_beat_rates_stdev)
+    puts(rant.heart_beat_rates.inject(0) {|sum,rate| sum + rate} / rant.heart_beat_rates.length)
   end
 
 end
