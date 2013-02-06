@@ -187,13 +187,35 @@ if __FILE__ == $0
       elapsed = (Time.now - start).to_i
       minutes = (elapsed / 60).to_s.rjust(2, "0")
       seconds = (elapsed % 60).to_s.rjust(2, "0")
-      breathing = if elapsed % 12 < 5
-        '*' * (2 * (elapsed % 12))
-      else
-        '*' * (12 - (elapsed % 12))
-      end
+      count = elapsed % 12
+      breathing = case count
+      when 0
+        '*'
+      when 1
+        '**'
+      when 2
+        '****'
+      when 3
+        '******'
+      when 4
+        '*******'
+      when 5
+        '******'
+      when 6
+        '*****'
+      when 7
+        '****'
+      when 8
+        '***'
+      when 9
+        '**'
+      when 10
+        '*'
+      when 11
+        ''
+      end.ljust(9, " ")
 
-      Formatador.redisplay("#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{breathing}", 64)
+      Formatador.redisplay("#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{breathing}", 40)
     end
 
   rescue Interrupt
