@@ -190,32 +190,32 @@ if __FILE__ == $0
       count = elapsed % 12
       breathing = case count
       when 0
-        '*'
-      when 1
-        '**'
-      when 2
-        '****'
-      when 3
-        '******'
-      when 4
-        '*******'
-      when 5
-        '******'
-      when 6
-        '*****'
-      when 7
-        '****'
-      when 8
         '***'
+      when 1
+        '******'
+      when 2
+        '*********'
+      when 3
+        '************'
+      when 4
+        '***************'
+      when 5
+        '*************'
+      when 6
+        '**********'
+      when 7
+        '********'
+      when 8
+        '******'
       when 9
-        '**'
+        '****'
       when 10
-        '*'
+        '**'
       when 11
         ''
-      end.ljust(9, " ")
+      end.ljust(17, " ")
 
-      Formatador.redisplay("#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{breathing}", 40)
+      Formatador.redisplay("#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{breathing}", 48)
     end
 
   rescue Interrupt
