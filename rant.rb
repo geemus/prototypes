@@ -131,12 +131,12 @@ class Rant
         self.heart_beat_times << (data[-3] * 256) + data[-4] # data is little endian
         self.heart_beat_rates << data[-1]
 
-        if self.heart_beat_times.length > 1
+        # only use consecutive beats, otherwise toss the data as too innacurate for HRV
+        if count_diff == 1 && self.heart_beat_times.length > 1
           interval = self.heart_beat_times[-1] - self.heart_beat_times[-2]
           if interval < 0
             interval += 65536
           end
-          interval /= count_diff # average across multiple beats as needed
           interval *= 0.9765625 # 1024/1000 to convert from 1/1024 units to ms
           self.heart_beat_intervals << interval.round # round to whole ms
         end
