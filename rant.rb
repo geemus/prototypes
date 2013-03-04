@@ -216,16 +216,18 @@ if __FILE__ == $0
       end.ljust(17, " ")
 
       stretch = if elapsed < 150
-        'pike'
+        'p'
       elsif elapsed < 300
-        'left'
+        'l'
       elsif elapsed < 450
-        'right'
+        'r'
       elsif elapsed < 600
-        'middle'
-      end.ljust('6', ' ')
+        'm'
+      else
+        'x'
+      end
 
-      data = "#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{}  |  #{breathing}"
+      data = "#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{stretch}  |  #{breathing}"
       Formatador.redisplay(data, 48)
     end
 
