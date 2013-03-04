@@ -215,7 +215,18 @@ if __FILE__ == $0
         ''
       end.ljust(17, " ")
 
-      Formatador.redisplay("#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{breathing}", 48)
+      stretch = if elapsed < 150
+        'pike'
+      elsif elapsed < 300
+        'left'
+      elsif elapsed < 450
+        'right'
+      elsif elapsed < 600
+        'middle'
+      end.ljust('6', ' ')
+
+      data = "#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{}  |  #{breathing}"
+      Formatador.redisplay(data, 48)
     end
 
   rescue Interrupt
