@@ -215,7 +215,7 @@ if __FILE__ == $0
         '*'
       when 11
         ''
-      end.ljust(17, " ")
+      end.ljust(10, " ")
 
       duration = 180
       stretch = if elapsed < duration
