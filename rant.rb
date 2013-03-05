@@ -217,7 +217,7 @@ if __FILE__ == $0
         ''
       end.ljust(17, " ")
 
-      duration = 150
+      duration = 180
       stretch = if elapsed < duration
         'p'
       elsif elapsed < duration * 2
