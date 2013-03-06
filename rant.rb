@@ -219,12 +219,14 @@ if __FILE__ == $0
 
       duration = 180
       stretch = if elapsed < duration
-        'p'
+        'f'
       elsif elapsed < duration * 2
-        'l'
+        'p'
       elsif elapsed < duration * 3
-        'r'
+        'l'
       elsif elapsed < duration * 4
+        'r'
+      elsif elapsed < duration * 5
         'm'
       else
         'x'
