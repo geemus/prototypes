@@ -239,7 +239,24 @@ if __FILE__ == $0
     puts
     puts("#{minutes}:#{seconds}")
     puts(rant.heart_beat_intervals.join(','))
+
+    # RMSSD the square root of the mean squared difference of successive NNs
+    # rolling RMSSD over last 8 intervals
+    intervals = rant.heart_beat_intervals.length
+    heart_beat_intervals_ln_rmssd = if intervals > 1
+      ssd = 0
+      (intervals - 1).times do |i|
+        diff = rant.heart_beat_intervals[i] - rant.heart_beat_intervals[i+1]
+        ssd += diff * diff
+      end
+      mssd = ssd / rant.heart_beat_intervals.length.to_f
+      ln_rmssd = Math.log(Math.sqrt(mssd))
+      format("%0.3f", ln_rmssd)
+    else
+      "0.000"
+    end
     puts(heart_beat_intervals_ln_rmssd)
+
     puts(rant.heart_beat_rates.join(','))
     puts(rant.heart_beat_rates.inject(0) {|sum,rate| sum + rate} / rant.heart_beat_rates.length)
   end
