@@ -169,11 +169,11 @@ if __FILE__ == $0
       rant.receive_message
 
       # RMSSD the square root of the mean squared difference of successive NNs
-      # rolling RMSSD over last 8 intervals
+      # rolling RMSSD over last 10 intervals
       intervals = rant.heart_beat_intervals.length
       heart_beat_intervals_ln_rmssd = if intervals > 1
         ssd = 0
-        [intervals - 10, 0].max.upto(intervals - 2) do |i|
+        [intervals - 12, 0].max.upto(intervals - 2) do |i|
           diff = rant.heart_beat_intervals[i] - rant.heart_beat_intervals[i+1]
           ssd += diff * diff
         end
