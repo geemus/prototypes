@@ -17,3 +17,5 @@ puts "'#{activity}': { '#{date}': '#{notes}' }"
 data[date] = notes
 
 File.open(path, 'w') {|file| file.write(data.to_json)}
+
+exec("ruby #{File.dirname(__FILE__)}/log_calendar.rb #{activity}")
