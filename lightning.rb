@@ -22,7 +22,7 @@ while true
   seconds = (elapsed % 60).to_s.rjust(2, "0")
   Formatador.redisplay("#{minutes}:#{seconds}  ")
   sleep(1)
-  if elapsed > 300
+  if elapsed >= 300
     break
   end
 end
