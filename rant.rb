@@ -233,7 +233,7 @@ if __FILE__ == $0
       end
 
 #      data = "#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  |  #{stretch}  |  #{breathing}"
-      data = "#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}"
+      data = "#{minutes}:#{seconds}  |  #{heart_beat_intervals_ln_rmssd}  |  #{heart_beat_rate}  "
       Formatador.redisplay(data, 48)
     end
 
