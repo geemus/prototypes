@@ -1,3 +1,5 @@
+require 'formatador'
+
 STDOUT.sync = true
 
 def say(string)
@@ -18,7 +20,8 @@ while true
   elapsed = (Time.now - start).to_i
   minutes = (elapsed / 60).to_s.rjust(2, "0")
   seconds = (elapsed % 60).to_s.rjust(2, "0")
-  puts("#{minutes}:#{second}")
+  Formatador.redisplay("#{minutes}:#{seconds}  ")
+  sleep(1)
   if elapsed > 300
     break
   end
