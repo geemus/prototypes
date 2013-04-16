@@ -1,4 +1,6 @@
-# TODO: https://github.com/larskanis/libusb
+# TODO: local dump-to-file, probably json with timestamp keys
+# TODO: append-only log, charts (maybe chartjs.org)
+# TODO: add nulls to intervals when missing points (so that rates/intervals have same number of datums)
 
 require 'rubygems'
 require 'formatador'
@@ -163,6 +165,8 @@ if __FILE__ == $0
     rant = Rant.new
     start = Time.now
 
+    warned = false
+
     STDOUT.sync=true
 
     while true
@@ -189,6 +193,14 @@ if __FILE__ == $0
       elapsed = (Time.now - start).to_i
       minutes = (elapsed / 60).to_s.rjust(2, "0")
       seconds = (elapsed % 60).to_s.rjust(2, "0")
+
+      if minutes % 5 == 0
+        `say -v victoria #{minutes}`
+        warned = true
+      else
+        warned = false
+      end
+
       count = elapsed % 12
       breathing = case count
       when 0
