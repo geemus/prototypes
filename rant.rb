@@ -1,6 +1,5 @@
 # TODO: local dump-to-file, probably json with timestamp keys
 # TODO: append-only log, charts (maybe chartjs.org)
-# TODO: add nulls to intervals when missing points (so that rates/intervals have same number of datums)
 
 require 'rubygems'
 require 'formatador'
@@ -142,6 +141,8 @@ class Rant
           interval *= 0.9765625 # 1024/1000 to convert from 1/1024 units to ms
           self.heart_beat_intervals << interval.round # round to whole ms
         end
+      else
+        self.heart_beat_intervals << nil
       end
     elsif data == [0x0, 0x1, 0x2] # rx fail, can be safely ignored and are quite noisy
     elsif type == MESSAGES[:channel_event]
@@ -174,14 +175,15 @@ if __FILE__ == $0
 
       # RMSSD the square root of the mean squared difference of successive NNs
       # rolling RMSSD over last 10 intervals
-      intervals = rant.heart_beat_intervals.length
+      compacted_intervals = rant.heart_beat_intervals.compact
+      intervals = compacted_intervals.length
       heart_beat_intervals_ln_rmssd = if intervals > 1
         ssd = 0
         [intervals - 12, 0].max.upto(intervals - 2) do |i|
-          diff = rant.heart_beat_intervals[i] - rant.heart_beat_intervals[i+1]
+          diff = compacted_intervals[i] - compacted_intervals[i+1]
           ssd += diff * diff
         end
-        mssd = ssd / rant.heart_beat_intervals.length.to_f
+        mssd = ssd / compacted_intervals.length.to_f
         ln_rmssd = Math.log(Math.sqrt(mssd))
         format("%0.3f", ln_rmssd)
       else
@@ -191,15 +193,19 @@ if __FILE__ == $0
       heart_beat_rate = rant.heart_beat_rates.last.to_s.rjust(3, "0")
 
       elapsed = (Time.now - start).to_i
-      minutes = (elapsed / 60).to_s.rjust(2, "0")
-      seconds = (elapsed % 60).to_s.rjust(2, "0")
 
-      if minutes % 5 == 0
-        `say -v victoria #{minutes}`
-        warned = true
+      minutes = elapsed / 60
+      if (minutes % 5 == 0)
+        unless warned
+          `say -v victoria #{minutes}`
+          warned = true
+        end
       else
         warned = false
       end
+
+      minutes = (elapsed / 60).to_s.rjust(2, "0")
+      seconds = (elapsed % 60).to_s.rjust(2, "0")
 
       count = elapsed % 12
       breathing = case count
@@ -257,14 +263,15 @@ if __FILE__ == $0
 
     # RMSSD the square root of the mean squared difference of successive NNs
     # rolling RMSSD over last 8 intervals
-    intervals = rant.heart_beat_intervals.length
+    compacted_intervals = rant.heart_beat_intervals.compact
+    intervals = compacted_intervals.length
     heart_beat_intervals_ln_rmssd = if intervals > 1
       ssd = 0
       (intervals - 1).times do |i|
-        diff = rant.heart_beat_intervals[i] - rant.heart_beat_intervals[i+1]
+        diff = compacted_intervals[i] - compacted_intervals[i+1]
         ssd += diff * diff
       end
-      mssd = ssd / rant.heart_beat_intervals.length.to_f
+      mssd = ssd / compacted_intervals.length.to_f
       ln_rmssd = Math.log(Math.sqrt(mssd))
       format("%0.3f", ln_rmssd)
     else
