@@ -14,7 +14,7 @@ def say(string)
   end
 end
 
-start = Time.now
+start, warned = Time.now, false
 
 while true
   elapsed = (Time.now - start).to_i
@@ -29,4 +29,5 @@ while true
   end
   seconds = (elapsed % 60).to_s.rjust(2, "0")
   Formatador.redisplay("#{minutes.to_s.rjust(2, "0")}:#{seconds}")
+  sleep(1)
 end
