@@ -47,5 +47,12 @@ stretches = [
   ["right",   150],
   ["middle",  150]
 ]
+#stretches(stretches)
 
-stretches(stretches)
+trifecta = [
+  ["bridge", 30],
+  ["l-seat", 30],
+  ["twist",  30],
+  ["twist",  30]
+]
+stretches(trifecta)
