@@ -14,18 +14,15 @@ def say(string)
   end
 end
 
-start, warned = Time.now, false
+start, warned = Time.now, 0
+interval = ARGV[0] || 1
 
 while true
   elapsed = (Time.now - start).to_i
   minutes = elapsed / 60
-  if (minutes % 5 == 0)
-    unless warned
-      say(minutes)
-      warned = true
-    end
-  else
-    warned = false
+  if (warned < minutes) && (minutes % interval == 0)
+    say(minutes)
+    warned = minutes
   end
   seconds = (elapsed % 60).to_s.rjust(2, "0")
   Formatador.redisplay("#{minutes.to_s.rjust(2, "0")}:#{seconds}")
