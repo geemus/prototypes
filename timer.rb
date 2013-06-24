@@ -1,13 +1,10 @@
 require 'formatador'
-require 'open3'
-
-STDOUT.sync = true
-srand
 
 def say(string)
   if !`which say`.empty?
     `say -v victoria #{string}`
   elsif !`which espeak`.empty?
+    require 'open3'
     Open3.capture3("espeak #{string} &>/dev/null")
   else
     puts("Unknown speak synthesizer (neither `espeak` nor `say` is available).")
