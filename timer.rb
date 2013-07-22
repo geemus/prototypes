@@ -12,7 +12,7 @@ def say(string)
 end
 
 start, warned = Time.now, 0
-interval = ARGV[0].to_i || 1
+interval = (ARGV[0] || 1).to_i
 
 while true
   elapsed = (Time.now - start).to_i
