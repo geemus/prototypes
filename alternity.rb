@@ -46,14 +46,14 @@ def check(target, modifier)
   puts "#{control} + #{situation}"
 
   total = control + situation
-  if total < target / 4 # Amazing Success
+  if control == 20 # Critical Failure
+    -1
+  elsif total < target / 4 # Amazing Success
     3
   elsif total < target / 2 # Good Success
     2
   elsif total < target || control == 1 # Ordinary Success
     1
-  elsif control == 20 # Critical Failure
-    -1
   else # total >= target # Nominal Failure
     0
   end
