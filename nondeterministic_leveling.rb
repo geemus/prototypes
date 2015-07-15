@@ -17,6 +17,7 @@ class Level
     else
       @current.to_f / (@successes.to_f + 1.0)
     end
+    probability = (1.0 - probability) * 100
     "#{self.class} (#{@name})  #{@current.to_s.rjust(2," ")}  +#{@successes.to_s.rjust(2," ")}  #{probability.round(2).to_s.ljust(4,"0")}%"
   end
 
