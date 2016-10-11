@@ -4,13 +4,14 @@ class Pack
   # magic: common, uncommon, rare, mythic rare
   # misc: common, uncommon, rare, super-rare (sometimes)
 
+  # retries + slots is how many are drawn
+  # slots is how many are kept
   def initialize(attributes = {})
-    @rolls = attributes[:rolls] || 1
+    @retries = attributes[:retries] || 0
     @slots = attributes[:slots] || 1
     @values = []
 
-    @slots.times do
-      roll = Array.new(@rolls).map { rand }.min
+    Array.new(@slots + @retries).map { rand }.sort.first(@slots).each do |roll|
       @values << if roll > 0.33
         :common
       elsif roll > 0.13
@@ -28,14 +29,14 @@ class Pack
   def inspect
     counts = { common: 0, uncommon: 0, rare: 0, epic: 0, legendary: 0 }
     @values.each {|value| counts[value] += 1 }
-    "#{@slots.to_s.rjust(2)} = c#{counts[:common]} u#{counts[:uncommon]} r#{counts[:rare]} e#{counts[:epic]} l#{counts[:legendary]}"
+    "#{@slots.to_s.rjust(2)}+#{@retries.to_s.ljust(2)} = c#{counts[:common]} u#{counts[:uncommon]} r#{counts[:rare]} e#{counts[:epic]} l#{counts[:legendary]}"
   end
 end
 
 srand
-[1, 5, 10].each do |slots|
-  4.times { puts(Pack.new(rolls: 1, slots: slots).inspect) }
-  puts
-  4.times { puts(Pack.new(rolls: 2, slots: slots).inspect) }
-  puts
+[2, 4, 8].each do |slots|
+  [0, 2, 4].each do |retries|
+    2.times { puts(Pack.new(retries: retries, slots: slots).inspect) }
+    puts
+  end
 end
