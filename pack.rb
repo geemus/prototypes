@@ -11,16 +11,16 @@ class Pack
 
     @slots.times do
       roll = Array.new(@rolls).map { rand }.min
-      @values << if roll <= 0.01
-        :legendary
-      elsif roll <= 0.05
-        :epic
-      elsif roll <= 0.13
-        :rare
-      elsif roll <= 0.33
-        :uncommon
-      else
+      @values << if roll > 0.33
         :common
+      elsif roll > 0.13
+        :uncommon
+      elsif roll > 0.05
+        :rare
+      elsif roll > 0.01
+        :epic
+      else
+        :legendary
       end
     end
   end
