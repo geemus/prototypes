@@ -5,18 +5,19 @@ class Pack
   # misc: common, uncommon, rare, super-rare (sometimes)
 
   def initialize(attributes = {})
+    @rolls = attributes[:rolls] || 1
     @slots = attributes[:slots] || 1
     @values = []
 
     @slots.times do
-      x = rand
-      @values << if x <= 0.01
+      roll = Array.new(@rolls).map { rand }.min
+      @values << if roll <= 0.01
         :legendary
-      elsif x <= 0.05
+      elsif roll <= 0.05
         :epic
-      elsif x <= 0.13
+      elsif roll <= 0.13
         :rare
-      elsif x <= 0.33
+      elsif roll <= 0.33
         :uncommon
       else
         :common
@@ -32,7 +33,9 @@ class Pack
 end
 
 srand
-1.upto(10).each do |slots|
-  4.times { puts(Pack.new(slots: slots).inspect) }
+[1, 5, 10].each do |slots|
+  4.times { puts(Pack.new(rolls: 1, slots: slots).inspect) }
+  puts
+  4.times { puts(Pack.new(rolls: 2, slots: slots).inspect) }
   puts
 end
