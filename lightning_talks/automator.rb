@@ -7,6 +7,7 @@ STDOUT.sync = true
 File.read(ARGV.first).split("\n").each do |line|
   slack, _, talk = line.split(" - ")
   puts "# #{slack} - #{talk}"
+  `osascript ./on_deck_slack.applescript #{slack} "#{talk}"`
   while true
     printf "GO? "
     input = STDIN.gets.strip
@@ -14,6 +15,5 @@ File.read(ARGV.first).split("\n").each do |line|
       break
     end
   end
-  puts %{osascript #{slack} "#{talk}"}
   `osascript ./timer_slack.applescript #{slack} "#{talk}"`
 end
