@@ -8,7 +8,7 @@ on run argv
       keystroke "/msg #lightning-talks " & username & " - " & talk
       keystroke return
 
-      keystroke "/msg " & username & " Start Lightning Talking!"
+      keystroke "/msg " & username & " Start Lightning Talk!"
       keystroke return
 
       keystroke "/remind " & username & " 4 Minutes Remaining in 1 minutes"
