@@ -19,6 +19,7 @@ board_id = "s7h2HGPk"
 ideas_list_id = "5a66645e93062e9fe9582cbe"
 experiments_list_id = "5a666478f1d8ff3c034f1189"
 
+invitees_count = 145
 members_count = request("/1/boards/#{board_id}/members").count
 ideas_count = request("/1/lists/#{ideas_list_id}/cards").count
 experiments_cards = request("/1/lists/#{experiments_list_id}/cards")
@@ -28,4 +29,12 @@ experimenters_count = experiments_cards.map do |card|
   request("/1/cards/#{card["id"]}/members").count
 end.reduce(:+)
 
-puts "Members: #{members_count} - Experimenters: #{experimenters_count} - Potential Ideas: #{ideas_count} - Active Experiments: #{experiments_count}"
+#Members: #{members_count} - Experimenters: #{experimenters_count} - Potential Ideas: #{ideas_count} - Active Experiments: #{experiments_count}"
+
+members_percent = (members_count.to_f / invitees_count.to_f * 100).round(1)
+experimenters_percent = (experimenters_count.to_f / members_count.to_f * 100).round(1)
+ideas_ratio = (ideas_count.to_f / members_count.to_f).round(1)
+
+puts "#{members_count} members | #{members_percent}% of invitees"
+puts "#{ideas_count} potential ideas | #{ideas_ratio} ideas per member"
+puts "#{experiments_count} active experiments | #{experimenters_percent}% members active"
