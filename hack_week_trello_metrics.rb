@@ -27,4 +27,4 @@ experimenters = experiments_cards.map do |card|
   request("/1/cards/#{card["id"]}/members").count
 end.reduce(:+)
 
-puts "Hack Week = Members: #{members.count} - Potential Ideas: #{ideas_cards.count} - Active Experiments: #{experiments_cards.count} - Experimenters: #{experimenters}"
+puts "Members: #{members.count} - Potential Ideas: #{ideas_cards.count} - Active Experiments: #{experiments_cards.count} - Experimenters: #{experimenters}"
