@@ -18,12 +18,14 @@ end
 board_id = "s7h2HGPk"
 ideas_list_id = "5a66645e93062e9fe9582cbe"
 experiments_list_id = "5a666478f1d8ff3c034f1189"
+deferred_experiments_list_id = "5a74d8aa99ce6a58ee11c3f2"
 
 invitees_count = 145
 members = request("/1/boards/#{board_id}/members").map {|member| member["username"]}
 members_count = members.count
 ideas_count = request("/1/lists/#{ideas_list_id}/cards").count
 experiments_cards = request("/1/lists/#{experiments_list_id}/cards")
+experiments_cards.concat request("/1/lists/#{deferred_experiments_list_id}/cards")
 experiments_count = experiments_cards.count
 
 ideators = []
