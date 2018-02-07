@@ -9,7 +9,7 @@ job[:destination] = { type: "file", path: "/tmp/moviemasher/render", method: "mo
 job[:inputs] << { type: 'video', source: "/tmp/moviemasher/hw-intro.mp4" , offset: 1.5, length: 9.5 }
 
 # colors/fonts/etc via brand.heroku.com
-inputs = Dir["/tmp/moviemasher/inputs/*.mp4"]
+inputs = Dir["/tmp/moviemasher/inputs/*.mp4"].shuffle
 inputs.each do |input|
   image = Magick::Image.new(1280, 720) do
     self.background_color = "#79589F"
