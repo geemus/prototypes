@@ -24,14 +24,15 @@ inputs.each do |input|
     self.pointsize = 128
   end
 
-  image_path = "/tmp/moviemasher/inputs/#{team_name}.png"
-  image.write(image_path)
+  inputs_dirname = "/tmp/moviemasher/inputs"
+  image_basename = "#{team_name}.png"
+  image.write(inputs_dirname + image_basename)
 
-  job[:inputs] << { type: 'image', source: image_path, length: 2 }
-  job[:inputs] << { type: 'video', source: input }
+  job[:inputs] << { type: 'image', source: { type: 'file', path: inputs_dirname, name: team_name, extension: 'png' }, length: 2 }
+  job[:inputs] << { type: 'video', source: { type: 'file', path: inputs_dirname, name: team_name, extension: 'mp4' } }
 end
 
-job[:outputs] << { type: 'video', name: 'hack-week-fy19q1' }
+job[:outputs] << { type: 'video', name: 'hack-week-fy19q1', precision: 0 }
 
 File.open('/tmp/moviemasher/queue/job.json', 'w') do |file|
   file.write(JSON.dump(job))
