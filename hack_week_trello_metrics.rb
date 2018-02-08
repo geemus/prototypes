@@ -23,10 +23,11 @@ deferred_experiments_list_id = "5a74d8aa99ce6a58ee11c3f2"
 invitees_count = 145
 members = request("/1/boards/#{board_id}/members").map {|member| member["username"]}
 members_count = members.count
-ideas_count = request("/1/lists/#{ideas_list_id}/cards").count
+ideas_cards = request("/1/lists/#{ideas_list_id}/cards")
 experiments_cards = request("/1/lists/#{experiments_list_id}/cards")
 experiments_cards.concat request("/1/lists/#{deferred_experiments_list_id}/cards")
 experiments_count = experiments_cards.count
+ideas_count = ideas_cards.count + experiments_cards.count
 
 ideators = []
 board_actions = request(
