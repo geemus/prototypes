@@ -26,7 +26,7 @@ inputs.each do |input|
 
   inputs_dirname = "/tmp/moviemasher/inputs"
   image_basename = "#{team_name}.png"
-  image.write(inputs_dirname + image_basename)
+  image.write(inputs_dirname + '/' + image_basename)
 
   job[:inputs] << { type: 'image', source: { type: 'file', path: inputs_dirname, name: team_name, extension: 'png' }, length: 2 }
   job[:inputs] << { type: 'video', source: { type: 'file', path: inputs_dirname, name: team_name, extension: 'mp4' } }
