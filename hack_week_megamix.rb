@@ -22,9 +22,9 @@ raw_paths.each do |path|
   text = Magick::Draw.new
   text.annotate(image, 0, 0, 0, 0, team_name) do
     self.fill = "#EEF1F6"
-    self.font_family = "Benton Sans" # inconsolata
+    self.font_family = "Inconsolata"
     self.gravity = Magick::CenterGravity
-    self.pointsize = 128
+    self.pointsize = 32
   end
 
   tmp_path = "#{tmp_dir}/#{team_name}"
@@ -33,7 +33,7 @@ raw_paths.each do |path|
   image.write(image_path)
 
   # generate a 2 second video from the image, with a fake audio source padded to the 2 second duration
-  `ffmpeg -y -loop 1 -i #{image_path.shellescape} -f lavfi -i anullsrc=32000 -af apad -c:a aac -t 2 -c:v libx264 -t 2 -movflags +faststart -pix_fmt yuv420p -r:v 30 -shortest #{image_video_path.shellescape}`
+  `ffmpeg -y -framerate 30 -loop 1 -i #{image_path.shellescape} -f lavfi -i anullsrc=32000 -af apad -c:a aac -t 2 -c:v libx264 -t 2 -movflags +faststart -pix_fmt yuv420p -shortest -vsync cfr #{image_video_path.shellescape}`
 
   file_paths << image_video_path
   file_paths << path
