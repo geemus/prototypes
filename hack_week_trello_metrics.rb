@@ -57,6 +57,7 @@ experimenters_percent = (experimenters_count.to_f / members_count.to_f * 100).ro
 ideas_ratio = (ideas_count.to_f / members_count.to_f).round(1)
 
 puts "#{members_count} board members | #{members_percent}% of invitees"
-puts "#{ideas_count} potential idea cards from #{ideators_count} members | #{ideas_ratio} ideas per member"
-puts "#{experiments_count} active experiment cards | #{experimenters_count} experiment members | #{experimenters_percent}% board members"
+puts "#{ideas_count} ideas from #{ideators_count} members | #{ideas_ratio} ideas per member"
+puts "#{experiments_count} active experiments"
+puts "#{experimenters_count} experiment members | #{experimenters_percent}% board members"
 puts "#{uncommitted_members.count} Uncommitted Board Members: [#{uncommitted_members.join(", ")}]"
