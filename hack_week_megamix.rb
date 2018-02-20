@@ -51,7 +51,7 @@ raw_paths.each do |path|
   hours = offset / 3600
   minutes = (offset % 3600) / 60
   seconds = offset % 60
-  timestamp = [hours, minutes, seconds].map {|time| time.to_s.ljust(2,'0')}.join(':')
+  timestamp = [hours, minutes, seconds].map {|time| time.to_s.rjust(2,'0')}.join(':')
   index_data << "#{timestamp} #{team_name}\n"
   offset += duration + 2 # 2 is title slide length
 end
