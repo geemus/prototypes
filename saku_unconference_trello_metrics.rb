@@ -35,10 +35,12 @@ board_actions.each do |action|
   authors << action["memberCreator"]["username"]
 end
 authors.uniq!
-puts "#{proposed_cards.count} sessions proposed by #{authors.count} authors"
+puts "#{proposed_cards.count} sessions from #{authors.count} authors"
 
 votes = []
 proposed_cards.each do |card|
   votes.concat request("/1/cards/#{card["id"]}/membersVoted").select {|voter| voter["username"]}
 end
 puts "#{votes.count} votes from #{votes.uniq.count} voters"
+
+puts "#{Time.now}"
