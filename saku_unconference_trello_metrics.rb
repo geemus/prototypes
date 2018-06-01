@@ -37,10 +37,10 @@ end
 authors.uniq!
 puts "#{proposed_cards.count} sessions from #{authors.count} authors"
 
-votes = []
+voters = []
 proposed_cards.each do |card|
-  votes.concat request("/1/cards/#{card["id"]}/membersVoted").select {|voter| voter["username"]}
+  voters.append(*card['idMembersVoted'])
 end
-puts "#{votes.count} votes from #{votes.uniq.count} voters"
+puts "#{voters.count} votes from #{voters.uniq.count} voters"
 
 puts "#{Time.now}"
