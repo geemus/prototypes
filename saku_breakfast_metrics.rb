@@ -50,4 +50,4 @@ participation = ((participants_count.to_f / 285).to_f * 100).round
 hosts_count = (wednesday_hosts + thursday_hosts).count
 voters_count = (wednesday_voters + thursday_voters).count
 
-puts "#{Time.now.utc.asctime} = #{participation}% participation: #{hosts_count} hosts and #{voters_count} votes from #{participants_count} participants"
+puts "#{Time.now.utc.strftime('%a %b %e %k:%M')} = #{participation}% participation: #{hosts_count} hosts, #{voters_count} votes, #{participants_count} participants"

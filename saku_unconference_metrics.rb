@@ -46,4 +46,4 @@ end
 participants_count = (authors + voters).uniq.count
 participation = ((participants_count.to_f / 285).to_f * 100).round
 
-puts "#{Time.now.utc.asctime} = #{participation}% participation: #{proposed_cards.count} topics and #{voters.count} votes from #{participants_count} participants"
+puts "#{Time.now.utc.strftime('%a %b %e %k:%M')} = #{participation}% participation: #{proposed_cards.count} topics, #{voters.count} votes, #{participants_count} participants"
