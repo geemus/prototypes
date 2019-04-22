@@ -15,13 +15,13 @@ def request(path, query = {})
   JSON.parse(connection.get(path: path, query: query).body)
 end
 
-board_id = "ZTunu3ww"
+board_id = "li4drZV3"
 
 members = request("/1/boards/#{board_id}/members").map {|member| member["username"]}
 puts "#{members.count} board members"
 
 #puts request("/1/boards/#{board_id}/lists/")
-proposed_list_id = "5afb4079653494f2284768e3"
+proposed_list_id = "5cb4dbd8de0fab5eb5bdbca1"
 proposed_cards = request("/1/lists/#{proposed_list_id}/cards")
 
 authors = []
