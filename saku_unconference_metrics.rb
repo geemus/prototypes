@@ -15,6 +15,8 @@ def request(path, query = {})
   JSON.parse(connection.get(path: path, query: query).body)
 end
 
+puts "Saku Unconference"
+
 board_id = "li4drZV3"
 
 members = request("/1/boards/#{board_id}/members").map {|member| member["username"]}
@@ -35,12 +37,13 @@ board_actions.each do |action|
   authors << action["memberCreator"]["username"]
 end
 authors.uniq!
-puts "#{proposed_cards.count} sessions from #{authors.count} authors"
 
 voters = []
 proposed_cards.each do |card|
   voters.append(*card['idMembersVoted'])
 end
-puts "#{voters.count} votes from #{voters.uniq.count} voters"
 
-puts "#{Time.now}"
+participants_count = (authors + voters).uniq.count
+participation = ((participants_count.to_f / 285).to_f * 100).round
+
+puts "#{Time.now.utc.asctime} = #{participation}% participation: #{proposed_cards.count} topics and #{voters.count} votes from #{participants_count} participants"
