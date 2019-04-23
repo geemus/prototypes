@@ -23,8 +23,18 @@ members = request("/1/boards/#{board_id}/members").map {|member| member["usernam
 puts "#{members.count} board members"
 
 #puts request("/1/boards/#{board_id}/lists/")
-proposed_list_id = "5cb4dbd8de0fab5eb5bdbca1"
-proposed_cards = request("/1/lists/#{proposed_list_id}/cards")
+
+proposed_list_ids = %w{
+5cb4dbd8de0fab5eb5bdbca1
+5cbf433f60a3fd8c9d0ab2f4
+5cbf435edebe624a1f6de5e1
+5cbf4381fd81a40ac475dfe7
+5cbf43b32d4ca809d44570f3
+}
+proposed_cards = []
+proposed_list_ids.each do |list_id|
+  proposed_cards.concat request("/1/lists/#{list_id}/cards")
+end
 
 authors = []
 board_actions = request(
