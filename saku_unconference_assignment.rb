@@ -15,8 +15,7 @@ def request(method, path, query = {})
   JSON.parse(connection.request(method: method, path: path, query: query).body)
 end
 
-board_id = "ZTunu3ww" # real
-# board_id = "SMrfVa2j" # scratch
+board_id = "li4drZV3" # real
 
 lists = request(:get, "/1/boards/#{board_id}/lists/")
 proposed_list_id = lists.detect {|list| list['name'] == 'Proposed'}['id']
@@ -33,10 +32,15 @@ proposed_cards = request(:get, "/1/lists/#{proposed_list_id}/cards")
 sorted_cards = proposed_cards.sort_by {|card| [card['idMembersVoted'].count, rand]}.reverse
 
 # round robin to fill sessions
-7.times do |x|
+9.times do |x|
   cards = sorted_cards.shift(4)
   4.times do |y|
-    request(:put, "/1/cards/#{cards[y]['id']}", { idList: session_list_ids[y] })
+    # anything with 3 or fewer votes will be overflow
+    if cards[y]['idMembersVoted'].count <= 3
+      request(:put, "/1/cards/#{cards[y]['id']}", { idList: overflow_list_id })
+    else
+      request(:put, "/1/cards/#{cards[y]['id']}", { idList: session_list_ids[y] })
+    end
   end
 end
 
