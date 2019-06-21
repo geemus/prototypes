@@ -1,3 +1,5 @@
+require 'io/console'
+
 actual = {}
 goals = {
   BIV:  0.2,
@@ -40,9 +42,10 @@ actual.keys.each do |key|
   shares = (diff / actual[key][:price]).round
   cash -= shares * actual[key][:price]
   puts "#{key.to_s.ljust(5)} $#{"%0.02f" % goal} = $#{"%0.02f" % actual[key][:value]} + $#{"%0.02f" % diff} => #{shares} * $#{"%0.2f" % actual[key][:price]}"
+  STDIN.getch
 end
 puts
 
 puts "cash remaining"
 puts "$#{"%0.02f" % cash}"
-
+puts
