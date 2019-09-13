@@ -52,6 +52,5 @@ cards_ratio = (cards_count.to_f / members_count.to_f).round(1)
 
 puts "#{members_count} board members"
 puts "#{cards_count} cards from #{creators_count} members | #{cards_ratio} ideas per member"
-puts "#{cards_count} learning opportunities"
-puts "#{joiners_count} joining members | #{joiners_percent}% board members"
+puts "#{joiners_count} members joined cards | #{joiners_percent}% board members"
 puts "#{uncommitted_members.count} Uncommitted Board Members: [#{uncommitted_members.join(", ")}]"
