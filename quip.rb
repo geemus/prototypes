@@ -97,14 +97,6 @@ JSON.parse(users_response.body).each do |key, value|
 end
 puts
 
-# stitch together DR output
-puts
-dr_threads.keys.sort_by {|key| dr_threads[key][:title]}.each do |key|
-  value = dr_threads[key]
-  next unless value[:title][0..6] == year_and_month
-  puts "#{value[:title]} by #{dr_authors[value[:author_id]]} #{value[:link]}"
-end
-
 # stitch together RFC output
 puts
 rfc_threads.keys.sort_by {|key| rfc_threads[key][:title]}.each do |key|
@@ -115,3 +107,12 @@ end
 
 puts
 
+# stitch together DR output
+puts
+dr_threads.keys.sort_by {|key| dr_threads[key][:title]}.each do |key|
+  value = dr_threads[key]
+  next unless value[:title][0..6] == year_and_month
+  puts "#{value[:title]} by #{dr_authors[value[:author_id]]} #{value[:link]}"
+end
+
+puts
