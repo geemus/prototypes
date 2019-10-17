@@ -2,8 +2,9 @@ require 'excon'
 require 'json'
 
 cursor = ARGV.first
+cursor = "#{cursor}=" if cursor && cursor[-1] != "="
 
-STALE = Time.now.utc - 60 * 60 * 24 * 90 # seconds * minutes * hours * days
+STALE = Time.now.utc - 60 * 60 * 24 * 180 # seconds * minutes * hours * days
 
 connection = Excon.new('https://slack.com')
 
@@ -59,4 +60,4 @@ channels.each do |key, channel|
   end
 end
 
-puts "CURSOR: #{ARGV.first} NEXT: #{JSON.parse(channel_list_response.body)['response_metadata']['next_cursor']}"
+puts "CURSOR: #{ARGV.first} || NEXT: #{JSON.parse(channel_list_response.body)['response_metadata']['next_cursor']}"
