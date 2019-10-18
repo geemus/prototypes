@@ -45,6 +45,7 @@ JSON.parse(channel_list_response.body)['channels'].each do |channel|
   end
   channels[channel['name']][:has_more] = channel_response_json['has_more']
 end
+print "[#{channels.count}]"
 puts
 
 channels.each do |key, channel|
