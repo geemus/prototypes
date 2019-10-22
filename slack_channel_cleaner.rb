@@ -49,8 +49,8 @@ print "[#{channels.count}]"
 puts
 
 channels.each do |key, channel|
-  # skip unless the last message was more than 6 months ago or there are no messages
-  next unless channel.fetch(:ts, Time.at(0.0).utc) < STALE
+  # skip unless last message > 6 months ago or no messages and created > 6 months ago
+  next unless channel.fetch(:ts, channel[:created]) < STALE
   print "STALE <=> #{channel} <=> Archive (y/n)? "
   if $stdin.gets.strip == "y"
     archive_response = connection.post({
