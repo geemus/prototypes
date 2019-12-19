@@ -97,12 +97,59 @@ JSON.parse(users_response.body).each do |key, value|
 end
 puts
 
+# Architectural Plans
+puts "Architectural Plans > Final"
+puts " -> get folder"
+final_folder_response = connection.get(path: '/1/folders/BDUAOAEUJHX')
+final_folder_children = JSON.parse(final_folder_response.body)['children']
+thread_ids = final_folder_children.select {|child| child.has_key?('thread_id')}.map {|child| child['thread_id']}
+
+# get all threads in final folder, collect titles and author_ids
+puts " -> get threads [#{thread_ids.join(',')}]"
+threads_response = connection.get(
+  path: '/1/threads/',
+  query: { ids: thread_ids.join(',') }
+)
+author_ids = []
+architectural_plans_threads = {}
+JSON.parse(threads_response.body).each do |key, value|
+  thread = value['thread']
+  architectural_plans_threads[key] = {
+    author_id:  thread['author_id'],
+    link:       thread['link'],
+    title:      thread['title']
+  }
+  author_ids.append(value['thread']['author_id'])
+end
+
+# get all authors
+puts " -> get authors [#{author_ids.join(',')}]"
+architectural_plans_authors = {}
+users_response = connection.get(
+  path: '/1/users/',
+  query: { ids: author_ids.join(',') }
+)
+JSON.parse(users_response.body).each do |key, value|
+  architectural_plans_authors[key] = value['name']
+end
+puts
+
 # stitch together RFC output
 puts
 rfc_threads.keys.sort_by {|key| rfc_threads[key][:title]}.each do |key|
   value = rfc_threads[key]
   next unless value[:title][0..6] == year_and_month
   puts "#{value[:title]} by #{rfc_authors[value[:author_id]]} #{value[:link]}"
+end
+
+puts
+
+# stitch together Architectural Plans output
+puts
+architectural_plans_threads.keys.sort_by {|key| architectural_plans_threads[key][:title]}.each do |key|
+  value = architectural_plans_threads[key]
+  next unless value[:title][0..6] == year_and_month
+  puts "#{value[:title]} by #{architectural_plans_authors[value[:author_id]]} #{value[:link]}"
 end
 
 puts
