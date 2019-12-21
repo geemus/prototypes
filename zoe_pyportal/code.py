@@ -23,44 +23,57 @@ pyportal = PyPortal(
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 
 def fetch_access_token():
-    response = wifi.post(
-        "https://www.googleapis.com/oauth2/v4/token",
-        json = {
-            "client_id":        secrets['google_client_id'],
-            "client_secret":    secrets['google_client_secret'],
-            "grant_type":       "refresh_token",
-            "refresh_token":    secrets['google_refresh_token']
-        }
-    )
-    return response.json()['access_token']
+    print("Fetching access token.")
+    access_token = None
+    while not access_token:
+        try:
+            response = wifi.post(
+                "https://www.googleapis.com/oauth2/v4/token",
+                json = {
+                    "client_id":        secrets['google_client_id'],
+                    "client_secret":    secrets['google_client_secret'],
+                    "grant_type":       "refresh_token",
+                    "refresh_token":    secrets['google_refresh_token']
+                }
+            )
+            access_token = response.json()['access_token']
+        except (KeyError, RuntimeError, ValueError) as e:
+            print("Some error occured, retrying! -", e)
+    print("Fetched access token.")
+    return access_token
 
 def fetch_photos():
     access_token = fetch_access_token()
 
-    response = wifi.post(
-        "https://photoslibrary.googleapis.com/v1/mediaItems:search?prettyPrint=false",
-        headers = {
-            'Authorization': 'Bearer ' + access_token
-        },
-        json = {
-            "albumId":      secrets['google_photos_shared_album_id'],
-            "pageSize":     6
-        },
-        timeout = 0
-    )
-    photos = response.json()['mediaItems']
-    response.close()
+    print("Fetching photos.")
+    photos = None
+    while not photos:
+        try:
+            response = wifi.post(
+                "https://photoslibrary.googleapis.com/v1/mediaItems:search?prettyPrint=false",
+                headers = {
+                    'Authorization': 'Bearer ' + access_token
+                },
+                json = {
+                    "albumId":      secrets['google_photos_shared_album_id'],
+                    "pageSize":     6
+                },
+                timeout = 0
+            )
+            photos = response.json()['mediaItems']
+            response.close()
+        except (KeyError, RuntimeError, ValueError) as e:
+            print("Some error occured, retrying! -", e)
+    print("Fetched photos.")
     return photos
 
 def randomize_background():
     photos = fetch_photos()
     index = random.randrange(0, 5)
-    print(index)
     image_url = photos[index]['baseUrl'] + "=w320-h240"
     try:
-        print("original URL:", image_url)
+        print("Converting photo.")
         image_url = pyportal.image_converter_url(image_url, 320, 240)
-        print("convert URL:", image_url)
         # convert image to bitmap and cache
         #print("**not actually wgetting**")
         filename = "/cache.bmp"
@@ -76,6 +89,7 @@ def randomize_background():
         except RuntimeError as error:
             print(error)
             raise RuntimeError("wget didn't write a complete file")
+        print("Coverted photo.")
         pyportal.set_background(filename, pyportal._image_position)
     except ValueError as error:
         print("Error displaying cached image. " + error.args[0])
