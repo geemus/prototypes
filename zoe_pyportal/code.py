@@ -79,33 +79,40 @@ def fetch_photos():
 def randomize_background():
     photos = fetch_photos()
     index = random.randrange(0, 7)
-    image_url = photos[index]['baseUrl'] + "=w320-h240"
-    try:
-        print("Converting photo.")
-        image_url = pyportal.image_converter_url(image_url, 320, 240)
-        # convert image to bitmap and cache
-        #print("**not actually wgetting**")
-        filename = "/cache.bmp"
-        chunk_size = 12000      # default chunk size is 12K (for QSPI)
-        if pyportal._sdcard:
-            filename = "/sd" + filename
-            chunk_size = 512  # current bug in big SD writes -> stick to 1 block
+    image_url = pyportal.image_converter_url(
+        photos[index]['baseUrl'] + "=w320-h240",
+        320,
+        240
+    )
+
+    print("Converting photo and caching.")
+    background_updated = False
+    while not background_updated:
         try:
-            pyportal.wget(image_url, filename, chunk_size=chunk_size)
-        except OSError as error:
-            print(error)
-            raise OSError("""\n\nNo writable filesystem found for saving datastream. Insert an SD card or set internal filesystem to be unsafe by setting 'disable_concurrent_write_protection' in the mount options in boot.py""") # pylint: disable=line-too-long
-        except RuntimeError as error:
-            print(error)
-            raise RuntimeError("wget didn't write a complete file")
-        print("Coverted photo.")
-        pyportal.set_background(filename, pyportal._image_position)
-    except ValueError as error:
-        print("Error displaying cached image. " + error.args[0])
-        pyportal.set_background(self._default_bg)
-    finally:
-        image_url = None
-        gc.collect()
+            # convert image to bitmap and cache
+            #print("**not actually wgetting**")
+            filename = "/cache.bmp"
+            chunk_size = 12000      # default chunk size is 12K (for QSPI)
+            if pyportal._sdcard:
+                filename = "/sd" + filename
+                chunk_size = 512  # current bug in big SD writes -> stick to 1 block
+            try:
+                pyportal.wget(image_url, filename, chunk_size=chunk_size)
+            except OSError as error:
+                print(error)
+                raise OSError("""\n\nNo writable filesystem found for saving datastream. Insert an SD card or set internal filesystem to be unsafe by setting 'disable_concurrent_write_protection' in the mount options in boot.py""") # pylint: disable=line-too-long
+            except RuntimeError as error:
+                print(error)
+                raise RuntimeError("wget didn't write a complete file")
+            print("Coverted photo.")
+            pyportal.set_background(filename, pyportal._image_position)
+            background_updated = True
+        except ValueError as error:
+            print("Error displaying cached image. " + error.args[0])
+            #pyportal.set_background(self._default_bg)
+        finally:
+            image_url = None
+            gc.collect()
 
 while True:
     try:
