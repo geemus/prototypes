@@ -39,6 +39,10 @@ def fetch_access_token():
             access_token = response.json()['access_token']
         except (KeyError, RuntimeError, ValueError) as e:
             print("Some error occured, retrying! -", e)
+        finally:
+            response.close()
+            response = None
+            gc.collect()
     print("Fetched access token.")
     return access_token
 
@@ -56,20 +60,23 @@ def fetch_photos():
                 },
                 json = {
                     "albumId":      secrets['google_photos_shared_album_id'],
-                    "pageSize":     6
+                    "pageSize":     8
                 },
                 timeout = 0
             )
             photos = response.json()['mediaItems']
-            response.close()
         except (KeyError, RuntimeError, ValueError) as e:
             print("Some error occured, retrying! -", e)
+        finally:
+            response.close()
+            response = None
+            gc.collect()
     print("Fetched photos.")
     return photos
 
 def randomize_background():
     photos = fetch_photos()
-    index = random.randrange(0, 5)
+    index = random.randrange(0, 7)
     image_url = photos[index]['baseUrl'] + "=w320-h240"
     try:
         print("Converting photo.")
