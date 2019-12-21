@@ -25,6 +25,7 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 def fetch_access_token():
     print("Fetching access token.")
     access_token = None
+    response = None
     while not access_token:
         try:
             response = wifi.post(
@@ -37,10 +38,10 @@ def fetch_access_token():
                 }
             )
             access_token = response.json()['access_token']
+            response.close()
         except (KeyError, RuntimeError, ValueError) as e:
             print("Some error occured, retrying! -", e)
         finally:
-            response.close()
             response = None
             gc.collect()
     print("Fetched access token.")
@@ -51,6 +52,7 @@ def fetch_photos():
 
     print("Fetching photos.")
     photos = None
+    response = None
     while not photos:
         try:
             response = wifi.post(
@@ -65,10 +67,10 @@ def fetch_photos():
                 timeout = 0
             )
             photos = response.json()['mediaItems']
+            response.close()
         except (KeyError, RuntimeError, ValueError) as e:
             print("Some error occured, retrying! -", e)
         finally:
-            response.close()
             response = None
             gc.collect()
     print("Fetched photos.")
