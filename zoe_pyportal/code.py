@@ -1,6 +1,4 @@
-import adafruit_requests as requests
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-from adafruit_esp32spi import adafruit_esp32spi
+from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 from adafruit_pyportal import PyPortal
 import board
 import busio
@@ -22,19 +20,10 @@ pyportal = PyPortal(
     esp=esp,
     external_spi=spi,
 )
-
-print("Connecting to AP...")
-while not esp.is_connected:
-    try:
-        esp.connect_AP(secrets['ssid'], secrets['password'])
-    except RuntimeError as e:
-        print("could not connect to AP, retrying: ", e)
-        continue
-print("Connected to", str(esp.ssid, 'utf-8'), "\tRSSI:", esp.rssi)
-requests.set_socket(socket, esp)
+wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 
 def fetch_access_token():
-    response = requests.post(
+    response = wifi.post(
         "https://www.googleapis.com/oauth2/v4/token",
         json = {
             "client_id":        secrets['google_client_id'],
@@ -48,14 +37,14 @@ def fetch_access_token():
 def fetch_photos():
     access_token = fetch_access_token()
 
-    response = requests.post(
+    response = wifi.post(
         "https://photoslibrary.googleapis.com/v1/mediaItems:search?prettyPrint=false",
         headers = {
             'Authorization': 'Bearer ' + access_token
         },
         json = {
             "albumId":      secrets['google_photos_shared_album_id'],
-            "pageSize":     8
+            "pageSize":     6
         },
         timeout = 0
     )
@@ -63,34 +52,9 @@ def fetch_photos():
     response.close()
     return photos
 
-# Set up where we'll be fetching data from
-#DATA_SOURCE = "https://www.adafruit.com/api/quotes.php"
-#QUOTE_LOCATION = [0, 'text']
-#AUTHOR_LOCATION = [0, 'author']
-#
-# the current working directory (where this file is)
-#cwd = ("/"+__file__).rsplit('/', 1)[0]
-#pyportal = PyPortal(esp=esp,
-#                    external_spi=spi,
-#                    url=DATA_SOURCE,
-#                    json_path=(QUOTE_LOCATION, AUTHOR_LOCATION),
-#                    status_neopixel=board.NEOPIXEL,
-#                    default_bg=cwd+"/quote_background.bmp",
-#                    text_font=cwd+"/fonts/Arial-ItalicMT-17.bdf",
-#                    text_position=((20, 120),  # quote location
-#                                   (5, 210)), # author location
-#                    text_color=(0xFFFFFF,  # quote text color
-#                                0x8080FF), # author text color
-#                    text_wrap=(35, # characters to wrap for quote
-#                               0), # no wrap for author
-#                    text_maxlen=(180, 30), # max text size for quote & author
-#                   )
-# speed up projects with lots of text by preloading the font!
-#pyportal.preload_font()
-
 def randomize_background():
     photos = fetch_photos()
-    index = random.randrange(0, 7)
+    index = random.randrange(0, 5)
     print(index)
     image_url = photos[index]['baseUrl'] + "=w320-h240"
     try:
@@ -123,7 +87,7 @@ def randomize_background():
 while True:
     try:
         randomize_background()
-    except RuntimeError as e:
+    except (KeyError, RuntimeError, ValueError) as e:
         print("Some error occured, retrying! -", e)
 
     time.sleep(60)
