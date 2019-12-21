@@ -110,7 +110,6 @@ def randomize_background():
 while True:
     try:
         randomize_background()
+        time.sleep(60)
     except (KeyError, RuntimeError, ValueError) as e:
         print("Some error occured, retrying! -", e)
-
-    time.sleep(60)
