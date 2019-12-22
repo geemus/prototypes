@@ -4,6 +4,7 @@ import board
 import busio
 from digitalio import DigitalInOut
 import gc
+import neopixel
 import random
 import time
 
@@ -16,14 +17,17 @@ esp = adafruit_esp32spi.ESP_SPIcontrol(
     DigitalInOut(board.ESP_BUSY),
     DigitalInOut(board.ESP_RESET)
 )
+neopix = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)
 pyportal = PyPortal(
     esp=esp,
     external_spi=spi,
+    status_neopixel=board.NEOPIXEL,
 )
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 
 def fetch_access_token():
     print("Fetching access token.")
+    neopix.fill((100, 100, 0)) # yellow fetching
     access_token = None
     response = None
     while not access_token:
@@ -38,8 +42,10 @@ def fetch_access_token():
                 }
             )
             access_token = response.json()['access_token']
+            neopix.fill((0, 100, 0)) # green success
             response.close()
         except (KeyError, RuntimeError, ValueError) as e:
+            neopix.fill((100, 0, 0)) # red success
             print("Some error occured, retrying! -", e)
         finally:
             response = None
@@ -51,6 +57,7 @@ def fetch_photos():
     access_token = fetch_access_token()
 
     print("Fetching photos.")
+    neopix.fill((100, 100, 0)) # yellow fetching
     photos = None
     response = None
     while not photos:
@@ -67,8 +74,10 @@ def fetch_photos():
                 timeout = 0
             )
             photos = response.json()['mediaItems']
+            neopix.fill((0, 100, 0)) # green success
             response.close()
         except (KeyError, RuntimeError, ValueError) as e:
+            neopix.fill((100, 0, 0)) # red success
             print("Some error occured, retrying! -", e)
         finally:
             response = None
@@ -86,6 +95,7 @@ def randomize_background():
     )
 
     print("Converting photo and caching.")
+    neopix.fill((100, 100, 0)) # yellow fetching
     background_updated = False
     while not background_updated:
         try:
@@ -100,16 +110,19 @@ def randomize_background():
                 pyportal.wget(image_url, filename, chunk_size=chunk_size)
             except OSError as error:
                 print(error)
+                neopix.fill((100, 0, 0)) # red success
                 raise OSError("""\n\nNo writable filesystem found for saving datastream. Insert an SD card or set internal filesystem to be unsafe by setting 'disable_concurrent_write_protection' in the mount options in boot.py""") # pylint: disable=line-too-long
             except RuntimeError as error:
                 print(error)
+                neopix.fill((100, 0, 0)) # red success
                 raise RuntimeError("wget didn't write a complete file")
             print("Coverted photo.")
             pyportal.set_background(filename, pyportal._image_position)
+            neopix.fill((0, 100, 0)) # green success
             background_updated = True
         except ValueError as error:
+            neopix.fill((100, 0, 0)) # red success
             print("Error displaying cached image. " + error.args[0])
-            #pyportal.set_background(self._default_bg)
         finally:
             image_url = None
             gc.collect()
