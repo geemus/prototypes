@@ -20,8 +20,7 @@ esp = adafruit_esp32spi.ESP_SPIcontrol(
 neopix = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)
 pyportal = PyPortal(
     esp=esp,
-    external_spi=spi,
-    status_neopixel=board.NEOPIXEL,
+    external_spi=spi
 )
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 
@@ -45,7 +44,7 @@ def fetch_access_token():
             neopix.fill((0, 100, 0)) # green success
             response.close()
         except (KeyError, RuntimeError, ValueError) as e:
-            neopix.fill((100, 0, 0)) # red success
+            neopix.fill((100, 0, 0)) # red error
             print("Some error occured, retrying! -", e)
         finally:
             response = None
@@ -77,7 +76,7 @@ def fetch_photos():
             neopix.fill((0, 100, 0)) # green success
             response.close()
         except (KeyError, RuntimeError, ValueError) as e:
-            neopix.fill((100, 0, 0)) # red success
+            neopix.fill((100, 0, 0)) # red error
             print("Some error occured, retrying! -", e)
         finally:
             response = None
@@ -110,18 +109,18 @@ def randomize_background():
                 pyportal.wget(image_url, filename, chunk_size=chunk_size)
             except OSError as error:
                 print(error)
-                neopix.fill((100, 0, 0)) # red success
+                neopix.fill((100, 0, 0)) # red error
                 raise OSError("""\n\nNo writable filesystem found for saving datastream. Insert an SD card or set internal filesystem to be unsafe by setting 'disable_concurrent_write_protection' in the mount options in boot.py""") # pylint: disable=line-too-long
             except RuntimeError as error:
                 print(error)
-                neopix.fill((100, 0, 0)) # red success
+                neopix.fill((100, 0, 0)) # red error
                 raise RuntimeError("wget didn't write a complete file")
             print("Coverted photo.")
             pyportal.set_background(filename, pyportal._image_position)
             neopix.fill((0, 100, 0)) # green success
             background_updated = True
         except ValueError as error:
-            neopix.fill((100, 0, 0)) # red success
+            neopix.fill((100, 0, 0)) # red error
             print("Error displaying cached image. " + error.args[0])
         finally:
             image_url = None
@@ -132,4 +131,5 @@ while True:
         randomize_background()
         time.sleep(60)
     except (KeyError, RuntimeError, ValueError) as e:
+        neopix.fill((100, 0, 0)) # red error
         print("Some error occured, retrying! -", e)
