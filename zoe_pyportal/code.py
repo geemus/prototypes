@@ -115,7 +115,7 @@ def randomize_background():
                 print(error)
                 neopix.fill((100, 0, 0)) # red error
                 raise RuntimeError("wget didn't write a complete file")
-            print("Coverted photo.")
+            print("Converted photo.")
             pyportal.set_background(filename, pyportal._image_position)
             neopix.fill((0, 100, 0)) # green success
             background_updated = True
