@@ -21,6 +21,7 @@ raw_data.each do |datum|
     @attendees[key].uniq!
   end
 end
+emails = @attendees.keys.shuffle
 
 # via: https://www.collinsdictionary.com/us/word-lists/architecture-architectural-styles
 styles = %w{ baroque bauhaus brutalist byzantine classical colonial composite corinthian decorated edwardian elizabethan empire federation functionalist georgian gothic modernist mannerist moorish neoclassicist norman palladian perpendicular postmodernist regency renaissance rococo roman romanesque saracen saxon transitional tudor tuscan victorian }
@@ -41,6 +42,22 @@ global_directions.each do |gd|
 end
 locations.shuffle!
 
-(@attendees.count / 8.0).round.times do
-  puts "#{styles.pop}-#{glossary.pop}-#{locations.pop}"
+total = @attendees.count
+groupings = (total / 8.0).ceil
+
+puts "#{total} attendees in #{groupings} groupings"
+puts
+
+groupings.times do
+  group_name = "#{styles.pop}-#{glossary.pop}-#{locations.pop}"
+  group_members = emails.pop(8)
+  group_preferences = []
+  group_members.each {|m| group_preferences.append(@attendees[m])}
+  group_preferences.flatten!
+  group_preferences.uniq!
+  group_preferences.compact!
+  group_preferences.each {|gp| gp.gsub!(',',' &')}
+
+  puts "#{group_name}, #{group_members.join(', ')}, #{group_preferences.join(' && ')}"
+  puts
 end
