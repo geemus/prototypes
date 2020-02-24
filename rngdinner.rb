@@ -30,9 +30,17 @@ styles.shuffle!
 glossary = %w{ accolade aisle apron arcade arch articulation atrium attic baluster basement basilica belfry bracket bulwark buttress cantilever capital chancel chimney column cornice cupola dormer eave facade gable gazebo grotto keystone lintel minaret nave niche oculus parapet pavilion pier portico rotunda spire stoop truss turret wing ziggurat}
 glossary.shuffle!
 
-global = %w{ fl fr cc bl br }
-local = %w{ fl ff fr ll cc rr bl bb br }
+global_directions = %w{ fl fr cc bl br }
+local_directions = %w{ fl ff fr ll cc rr bl bb br }
+
+locations = []
+global_directions.each do |gd|
+  local_directions.each do |ld|
+    locations << "#{gd}#{ld}"
+  end
+end
+locations.shuffle!
 
 (@attendees.count / 8.0).round.times do
-  puts "#{styles.pop}-#{glossary.pop}-#{global.shuffle.first}#{local.shuffle.first}"
+  puts "#{styles.pop}-#{glossary.pop}-#{locations.pop}"
 end
