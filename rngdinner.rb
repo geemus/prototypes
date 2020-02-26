@@ -1,30 +1,7 @@
 require 'smarter_csv'
 
-raw_data = SmarterCSV.process(
-  './yes.csv',
-  headers_in_file: false,
-  user_provided_headers: [:email,:preferences]
-)
-
-@attendees = {}
-
-# there were some duplicate attendees in the original data, to cleanup:
-# 1. create an array of preferences for each email address
-# 2. drop any nil/None preferences for simplicity
-# 3. add any remaining preferences
-# 4. drop any duplicate preferences for simplicity
-raw_data.each do |datum|
-  key = datum[:email]
-  @attendees[key] ||= []
-  unless [nil, 'None'].include?(datum[:preferences])
-    @attendees[key].append(datum[:preferences])
-    @attendees[key].uniq!
-  end
-end
-emails = @attendees.keys.shuffle
-
 # via: https://www.collinsdictionary.com/us/word-lists/architecture-architectural-styles
-styles = %w{ baroque bauhaus brutalist byzantine classical colonial composite corinthian decorated edwardian elizabethan empire federation functionalist georgian gothic modernist mannerist moorish neoclassicist norman palladian perpendicular postmodernist regency renaissance rococo roman romanesque saracen saxon transitional tudor tuscan victorian }
+styles = %w{ baroque bauhaus brutalist byzantine classical colonial composite corinthian decorated edwardian elizabethan empire federation functionalist georgian gothic modernist mannerist moorish neoclassicist norman palladian postmodernist regency renaissance rococo roman romanesque saracen saxon transitional tudor tuscan victorian }
 styles.shuffle!
 
 # via: https://en.wikipedia.org/wiki/Glossary_of_architecture
@@ -42,12 +19,55 @@ global_directions.each do |gd|
 end
 locations.shuffle!
 
+raw_data = SmarterCSV.process(
+  './yes.csv',
+  headers_in_file: false,
+  user_provided_headers: [:email,:preferences]
+)
+
+@vegans = {}
+@attendees = {}
+
+# there were some duplicate attendees in the original data, to cleanup:
+# 1. create an array of preferences for each email address
+# 2. drop any nil/None preferences for simplicity
+# 3. add any remaining preferences
+# 4. drop any duplicate preferences for simplicity
+raw_data.each do |datum|
+  key = datum[:email]
+  if datum[:preferences] && datum[:preferences].include?('Vegan')
+    @vegans[key] ||= []
+    @vegans[key].append(datum[:preferences])
+    @vegans[key].uniq!
+  else
+    @attendees[key] ||= []
+    unless [nil, 'None'].include?(datum[:preferences])
+      @attendees[key].append(datum[:preferences])
+      @attendees[key].uniq!
+    end
+  end
+end
+emails = @attendees.keys.shuffle
+
 total = @attendees.count
 groupings = (total / 8.0).ceil
 
+puts "#{@vegans.count} vegans in 1 grouping"
 puts "#{total} attendees in #{groupings} groupings"
 puts
 
+# vegan group
+group_name = "#{styles.pop}-#{glossary.pop}-#{locations.pop}"
+group_members = @vegans.keys.shuffle
+group_preferences = []
+group_members.each {|m| group_preferences.append(@vegans[m])}
+group_preferences.flatten!
+group_preferences.uniq!
+group_preferences.compact!
+group_preferences.each {|gp| gp.gsub!(',',' &')}
+puts "#{group_name}, #{group_preferences.join(' && ')}, #{group_members.join(', ')}"
+
+# other groupings
 groupings.times do
   group_name = "#{styles.pop}-#{glossary.pop}-#{locations.pop}"
   group_members = emails.pop(8)
@@ -58,6 +78,5 @@ groupings.times do
   group_preferences.compact!
   group_preferences.each {|gp| gp.gsub!(',',' &')}
 
-  puts "#{group_name}, #{group_members.join(', ')}, #{group_preferences.join(' && ')}"
-  puts
+  puts "#{group_name}, #{group_preferences.join(' && ')}, #{group_members.join(', ')}"
 end
