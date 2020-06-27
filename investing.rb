@@ -34,7 +34,7 @@ puts "current + cash = new total"
 puts "$#{"%0.02f" % total} + $#{"%0.02f" % cash} = $#{"%0.02f" % (total + cash)}"
 puts
 
-puts "key ttotal = current + shares * price"
+puts "key total = current + shares * price"
 total += cash
 actual.keys.each do |key|
   goal = total * goals[key]
