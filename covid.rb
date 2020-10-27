@@ -1,6 +1,8 @@
 require 'excon'
+require 'json'
 
 COUNTY = "Johnson County,IA"
+FIPS = "19103"
 
 TARGETS = {
   confirmed: "https://usafactsstatic.blob.core.windows.net/public/data/covid-19/covid_confirmed_usafacts.csv",
@@ -22,3 +24,16 @@ TARGETS.each do |key, value|
     break
   end
 end
+
+response = Excon.get(
+  "https://api.covidactnow.org/v2/county/#{FIPS}.timeseries.json",
+  query: { 'apiKey' => ENV['COVID_ACT_NOW'] }
+)
+data = JSON.parse(response.body)
+timeseries = data['metricsTimeseries'].last(10)
+dates = timeseries.map {|a| a['date'].gsub('-','/')}.join(',')
+positivities = timeseries.map {|a| a['testPositivityRatio'].round(2)}.join(',')
+
+puts "TEST POSITIVITY"
+puts "DATES: #{dates}"
+puts "RATIO: #{positivities}"
