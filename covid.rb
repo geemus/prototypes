@@ -27,6 +27,7 @@ end
 
 response = Excon.get(
   "https://api.covidactnow.org/v2/county/#{FIPS}.timeseries.json",
+  expects: 200,
   query: { 'apiKey' => ENV['COVID_ACT_NOW'] }
 )
 data = JSON.parse(response.body)
