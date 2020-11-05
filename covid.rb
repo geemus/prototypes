@@ -39,7 +39,7 @@ deaths = actuals.map {|a| a['deaths']}.join(',')
 
 metrics = data['metricsTimeseries'].last(10)
 metrics_dates = metrics.map {|a| a['date'].gsub('-','/')}.join(',')
-positivities = metrics.map {|a| a['testPositivityRatio'].round(2)}.join(',')
+positivities = metrics.map {|a| a['testPositivityRatio'] && a['testPositivityRatio'].round(2)}.join(',')
 
 puts "covidactnow API"
 puts "ACTUALS DATES: #{actuals_dates}"
