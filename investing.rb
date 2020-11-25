@@ -26,12 +26,12 @@ while !(line = lines.shift).empty?
   total += value.to_f
   actuals[symbol.to_sym] = { price: price.to_f, value: value.to_f }
 end
-
+current = total
 cash = ARGV.first.to_f
 
 puts
 puts "current + cash = new total"
-puts "$#{"%0.02f" % total} + $#{"%0.02f" % cash} = $#{"%0.02f" % (total + cash)}"
+puts "$#{"%0.02f" % current} + $#{"%0.02f" % cash} = $#{"%0.02f" % (current + cash)}"
 puts
 total += cash
 
@@ -40,10 +40,31 @@ goals.keys.each do |key|
   targets[key] = total * goals[key]
 end
 
+puts "over represented"
+actuals.keys.each do |key|
+  price, target, value = actuals[key][:price], targets[key], actuals[key][:value]
+  if value > target
+    diff = value - target
+    cash -= diff
+    total -= diff
+    puts "#{key} #{value} = #{target} - #{diff}"
+  end
+end
+puts
+
+puts "current + cash = new total"
+puts "$#{"%0.02f" % current} + $#{"%0.02f" % cash} = $#{"%0.02f" % total}"
+puts
+
+targets = {}
+goals.keys.each do |key|
+  targets[key] = total * goals[key]
+end
+
+puts "under represented"
 puts "key total = current + shares * price"
 actuals.keys.each do |key|
-  price, value = actuals[key][:price], actuals[key][:value]
-  target = targets[key]
+  price, target, value = actuals[key][:price], targets[key], actuals[key][:value]
   diff = target - value
   shares = (diff / price).round
   cash -= shares * price
