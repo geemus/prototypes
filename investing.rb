@@ -1,6 +1,6 @@
 require 'io/console'
 
-actual = {}
+actuals = {}
 goals = {
   BIV:  0.2,
   VB:   0.1,
@@ -24,7 +24,7 @@ while !(line = lines.shift).empty?
   _, _, symbol, _, price, value = line.split(",")
   next unless goals.keys.include?(symbol.to_sym)
   total += value.to_f
-  actual[symbol.to_sym] = { price: price.to_f, value: value.to_f }
+  actuals[symbol.to_sym] = { price: price.to_f, value: value.to_f }
 end
 
 cash = ARGV.first.to_f
@@ -33,15 +33,21 @@ puts
 puts "current + cash = new total"
 puts "$#{"%0.02f" % total} + $#{"%0.02f" % cash} = $#{"%0.02f" % (total + cash)}"
 puts
+total += cash
+
+targets = {}
+goals.keys.each do |key|
+  targets[key] = total * goals[key]
+end
 
 puts "key total = current + shares * price"
-total += cash
-actual.keys.each do |key|
-  goal = total * goals[key]
-  diff = goal - actual[key][:value]
-  shares = (diff / actual[key][:price]).round
-  cash -= shares * actual[key][:price]
-  puts "#{key.to_s.ljust(5)} $#{"%0.02f" % goal} = $#{"%0.02f" % actual[key][:value]} + $#{"%0.02f" % diff} => #{shares} * $#{"%0.2f" % actual[key][:price]}"
+actuals.keys.each do |key|
+  price, value = actuals[key][:price], actuals[key][:value]
+  target = targets[key]
+  diff = target - value
+  shares = (diff / price).round
+  cash -= shares * price
+  puts "#{key.to_s.ljust(5)} $#{"%0.02f" % target} = $#{"%0.02f" % value} + $#{"%0.02f" % diff} => #{shares} * $#{"%0.2f" % price}"
   STDIN.getch
 end
 puts
