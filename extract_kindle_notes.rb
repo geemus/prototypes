@@ -10,7 +10,13 @@ puts "# #{title} by #{author}\n"
 
 doc.css('.kp-notebook-row-separator').each do |row|
   metadata = row.css('.kp-notebook-metadata').first.content
-  location = metadata.split("Location:").last[1..-1].gsub(',','')
+
+  splitter = if metadata.include?("Location:")
+    "Location:"
+  elsif metadata.include?("Page:")
+    "Page:"
+  end
+  location = metadata.split(splitter).last[1..-1].gsub(',','')
 
   highlight = row.css('#highlight').first
   next unless highlight
