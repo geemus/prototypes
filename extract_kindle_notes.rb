@@ -22,5 +22,5 @@ doc.css('.kp-notebook-row-separator').each do |row|
   next unless highlight
   quote = highlight.inner_text
 
-  puts "- #{quote} [#{location}]"
+  puts "- #{quote} (#{location})"
 end
