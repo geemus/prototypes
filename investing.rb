@@ -49,7 +49,7 @@ diff_unit = cash / diffs.values.reduce(:+)
 diffs.keys.each do |key|
   diff = diffs[key] * diff_unit
   price = actuals[key][:price]
-  shares = (diff / price).round
+  shares = (diff / price).floor
   cash -= shares * price
 end
 puts "cash remaining"
@@ -60,7 +60,7 @@ puts "key  value/goal = diff || shares * price = total"
 diffs.keys.each do |key|
   diff = diffs[key] * diff_unit
   price, target, value = actuals[key][:price], targets[key], actuals[key][:value]
-  shares = (diff / price).round
+  shares = (diff / price).floor
   puts "#{key.to_s.ljust(5)} $#{"%0.02f" % value}/$#{"%0.02f" % target} = +$#{"%0.02f" % diff} || #{shares} * $#{"%0.2f" % price} = $#{"%0.2f" % (shares * price)}"
   STDIN.getch
 end
