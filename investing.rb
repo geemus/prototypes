@@ -28,11 +28,6 @@ while !(line = lines.shift).empty?
 end
 current = total
 cash = ARGV.first.to_f
-
-puts
-puts "current + cash = new total"
-puts "$#{"%0.02f" % current} + $#{"%0.02f" % cash} = $#{"%0.02f" % (current + cash)}"
-puts
 total += cash
 
 targets = {}
@@ -40,38 +35,25 @@ goals.keys.each do |key|
   targets[key] = total * goals[key]
 end
 
-puts "over represented"
+diffs = {}
 actuals.keys.each do |key|
-  price, target, value = actuals[key][:price], targets[key], actuals[key][:value]
-  if value > target
-    diff = value - target
-    cash -= diff
-    total -= diff
-    puts "#{key} #{value} = #{target} - #{diff}"
-  end
-end
-puts
-
-puts "current + cash = new total"
-puts "$#{"%0.02f" % current} + $#{"%0.02f" % cash} = $#{"%0.02f" % total}"
-puts
-
-targets = {}
-goals.keys.each do |key|
-  targets[key] = total * goals[key]
+  diff = targets[key] - actuals[key][:value]
+  next unless diff > 0
+  diffs[key] = targets[key] - actuals[key][:value]
 end
 
-puts "under represented"
 puts "key total = current + shares * price"
-actuals.keys.each do |key|
+max_diff = diffs.values.max
+diffs.each {|k,v| diffs[k] = diffs[k] / max_diff}
+diff_unit = cash / diffs.values.reduce(:+)
+diffs.keys.each do |key|
+  diff = diffs[key] * diff_unit
   price, target, value = actuals[key][:price], targets[key], actuals[key][:value]
-  diff = target - value
   shares = (diff / price).round
+  puts "#{key.to_s.ljust(5)} $#{"%0.02f" % target}/$#{"%0.02f" % value} = +$#{"%0.02f" % diff} || #{shares} * $#{"%0.2f" % price} = $#{"%0.2f" % (shares * price)}"
   cash -= shares * price
-  puts "#{key.to_s.ljust(5)} $#{"%0.02f" % target} = $#{"%0.02f" % value} + $#{"%0.02f" % diff} => #{shares} * $#{"%0.2f" % price}"
   STDIN.getch
 end
-puts
 
 puts "cash remaining"
 puts "$#{"%0.02f" % cash}"
