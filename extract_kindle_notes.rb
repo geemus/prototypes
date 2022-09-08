@@ -1,6 +1,6 @@
 require 'nokogiri'
 
-data = File.read(ARGV.first)
+data = `xclip -out -selection clipboard`
 doc = Nokogiri::HTML(data)
 
 title = doc.css('h3.kp-notebook-metadata').first.inner_text
