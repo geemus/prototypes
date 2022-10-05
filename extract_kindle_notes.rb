@@ -14,20 +14,12 @@ author = doc.css('p.kp-notebook-metadata').last.inner_text
 
 puts "# #{title} by #{author}\n"
 
-doc.css('.kp-notebook-row-separator').each do |row|
-  metadata = row.css('.kp-notebook-metadata').first.content
+doc.css('span#highlight').each do |hl|
+  quote = hl.inner_text
 
-  splitter = if metadata.include?('Location:')
-               'Location:'
-             elsif metadata.include?('Page:')
-               'Page:'
-             end
-  location = metadata.split(splitter).last[1..-1].gsub(',', '')
-
-  highlight = row.css('#highlight').first
-  next unless highlight
-
-  quote = highlight.inner_text
-
-  puts "- #{quote} (#{location})"
+  if quote.split.length > 1 && quote.split.all? { |x| /[[:upper:]]/.match(x[0]) }
+    puts "## #{quote}"
+  else
+    puts "- #{quote}"
+  end
 end
