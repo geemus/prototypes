@@ -1,6 +1,10 @@
 require 'nokogiri'
 
-data = `xclip -out -selection clipboard`
+data = if !`which xclip`.empty?
+         `xclip -out -selection clipboard`
+       elsif !`which pbpaste`.empty?
+         `pbpaste`
+       end
 doc = Nokogiri::HTML(data)
 
 title = doc.css('h3.kp-notebook-metadata').first.inner_text
