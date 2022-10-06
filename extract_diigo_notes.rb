@@ -12,7 +12,7 @@ doc = Nokogiri::HTML(data)
 doc.css('li').each do |li|
   quote = li.inner_text
 
-  if quote.split.length > 1 && quote.split.all? { |x| /[[:upper:]]/.match(x[0]) }
+  if quote.split.count { |x| /[[:upper:]]/.match(x[0]) } > quote.split.count { |x| /[[:lower:]]/.match(x[0]) }
     puts "## #{quote}"
   else
     puts "- #{quote}"
