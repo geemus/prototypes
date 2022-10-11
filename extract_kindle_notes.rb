@@ -18,7 +18,7 @@ doc.css('span#highlight').each do |hl|
   quote = hl.inner_text
 
   if quote.split.count { |x| /[[:upper:]]/.match(x[0]) } > quote.split.count { |x| /[[:lower:]]/.match(x[0]) }
-    puts "## #{quote}"
+    puts "### #{quote}"
   else
     puts "- #{quote}"
   end
