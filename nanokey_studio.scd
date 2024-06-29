@@ -1,9 +1,8 @@
 (
-  s.boot;
-
-  ~notes = Array.newClear(indexedSize:128);
-
-  MIDIClient.init;
+  s.waitForBoot({
+    ~notes = Array.newClear(indexedSize:128);
+    MIDIClient.init;
+  });
 )
 (
   MIDIIn.connectAll(verbose:true);
