@@ -54,7 +54,7 @@ bookmarks.each do |bookmark|
     chapter_title = false
   end
 
-  text = "#{bookmark['Text']} <#{bookmark['ChapterProgress']}#{bookmark['StartContainerPath'].gsub(/[^\d.]*/, '')}>"
+  text = "#{bookmark['Text']} <#{bookmark['StartContainerPath'].gsub(/[^\d.]*/, '')[1..-1]}>"
 
   # Titlecase
   if text.split.count { |x| /[[:upper:]]/.match(x[0]) } > text.split.count { |x| /[[:lower:]]/.match(x[0]) }
