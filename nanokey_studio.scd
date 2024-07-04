@@ -17,7 +17,8 @@
     sig = sig * env * amp;
     Out.ar(out, sig);
   }).add;
-
+)
+(
   // touchpad pitch/mod x
   MIDIdef.bend(
     key: \bend,
