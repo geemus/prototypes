@@ -38,7 +38,7 @@
     key:\lfoArgMul,
     func: {
       |val, num, chan, src|
-      var mul = val.linlin(inMin:0, inMax:127, outMin:0, outMax:1);
+      var mul = val.linlin(inMin:0, inMax:127, outMin:0.0, outMax:1.0);
       ["lfoArgMul:", mul].postln;
       ~lfoArgMulBus.set(mul);
     },
@@ -46,15 +46,42 @@
     chan: 0,
   ).permanent_(true);
 
+  ~filterArgFreqBus = Bus.control(server:s, numChannels:1); ~filterArgFreqBus.set(440.0);
+  MIDIdef.cc(
+    key:\filterArgFreq,
+    func: {
+      |val, num, chan, src|
+      var freq = val.linexp(inMin:0, inMax:127, outMin:20.0, outMax:15000.0);
+      ["filterArgFreq:", freq].postln;
+      ~filterArgFreqBus.set(freq);
+    },
+    ccNum: #[23],
+    chan: 0,
+  ).permanent_(true);
+
+  ~filterArgRqBus = Bus.control(server:s, numChannels:1); ~filterArgRqBus.set(0.5);
+  MIDIdef.cc(
+    key:\filterArgRq,
+    func: {
+      |val, num, chan, src|
+      var rq = val.linlin(inMin:0, inMax:127, outMin:0.01, outMax:1.0);
+      ["filterArgRq:", rq].postln;
+      ~filterArgRqBus.set(rq);
+    },
+    ccNum: #[27],
+    chan: 0,
+  ).permanent_(true);
+
   ~lfoOutBus = Bus.audio(server:s, numChannels:1);
   SynthDef(\lfo, {
-    arg argFreq, argMul, argShape, outBus;
+    arg argFreq, argMul, argShape, argFilterFreq, argFilterRq, argoutBus;
     var sig;
     sig = Select.ar(which:argShape, array:[
       LFSaw.ar(freq:argFreq, iphase:0.0, mul:argMul, add:0.0),
       LFTri.ar(freq:argFreq, iphase:0.0, mul:argMul, add:0.0),
       LFPulse.ar(freq:argFreq, iphase:0.0, width: 0.5, mul:argMul, add:0.0),
     ]);
+    sig = RLPF.ar(in:sig, freq:argFilterFreq, rq:argFilterRq, mul:1.0, add:0.0);
     Out.ar(bus:0, channelsArray:sig);
   }).add;
 )
@@ -67,9 +94,13 @@
       \argFreq, ~lfoArgFreqBus.asMap,
       \argMul, ~lfoArgMulBus.asMap,
       \argShape, ~lfoArgShapeBus.asMap,
+      \argFilterFreq, ~filterArgFreqBus.asMap,
+      \argFilterRq, ~filterArgRqBus.asMap,
       \outBus, ~lfoOutBus,
   ]);
 )
+
+FreqScope.new;
 
 s.scope;
 
