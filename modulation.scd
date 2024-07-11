@@ -181,6 +181,8 @@
   );
 )
 
+~vcaOut.scope;
+
 FreqScope.new;
 
 s.scope;
