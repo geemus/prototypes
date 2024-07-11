@@ -33,7 +33,7 @@
 
   ~vcoFreq = Bus.control(server:s, numChannels:1); ~vcoFreq.set(440.0);
   ~vcoMul = Bus.control(server:s, numChannels:1); ~vcoMul.set(0.25);
-  ~vcoGate = Bus.control(server:s, numChannels:1); ~vcoGate.set(1);
+  ~vcaGate = Bus.control(server:s, numChannels:1); ~vcaGate.set(0);
   MIDIdef.noteOn(
     key:\keysNoteOn,
     func: {
@@ -44,7 +44,7 @@
       //"keysNoteOn - freq:%, mul:%, gate:%".format(freq, mul, gate).postln;
       ~vcoFreq.set(freq);
       ~vcoMul.set(mul);
-      ~vcoGate.set(gate);
+      ~vcaGate.set(gate);
     },
     chan: 0,
   ).permanent_(true);
@@ -58,21 +58,18 @@
       //"keysNoteOff - freq:%, mul:%, gate:%".format(freq, mul, gate).postln;
       ~vcoFreq.set(freq);
       ~vcoMul.set(mul);
-      ~vcoGate.set(gate);
+      ~vcaGate.set(gate);
     },
     chan: 0,
   ).permanent_(true);
 
   ~lfoOut = Bus.audio(server:s, numChannels:1);
   SynthDef(\lfo, {
-    arg ccFreq, ccMul, ccShape, ccFilterFreq, ccFilterRq, outBus;
+    arg ccFreq, ccMul, ccShape, outBus;
 
     var freq = ccFreq.linexp(inMin:0, inMax:127, outMin:1.0, outMax:15000.0);
     var mul = ccMul.linlin(inMin:0, inMax:127, outMin:0.0, outMax:0.3);
     var shape = ccShape.linlin(inMin:0, inMax:127, outMin:0, outMax:2).round;
-
-    var filterFreq = ccFilterFreq.linexp(inMin:0, inMax:127, outMin:20.0, outMax:15000.0);
-    var filterRq = ccFilterRq.linlin(inMin:0, inMax:127, outMin:0.01, outMax:1.0);
 
     var sig = Select.ar(which:shape, array:[
       LFSaw.ar(freq:freq, iphase:0.0, mul:mul, add:0.0),
@@ -80,21 +77,34 @@
       LFPulse.ar(freq:freq, iphase:0.0, width: 0.5, mul:mul, add:0.0),
     ]);
 
-    sig = RLPF.ar(in:sig, freq:filterFreq, rq:filterRq, mul:1.0, add:0.0);
-    sig = sig ! 2;
-    sig = Limiter.ar(in:sig, level:1.0);
-    Out.ar(bus:0, channelsArray:sig);
+    sig = Limiter.ar(in:sig, level:0.3);
+    Out.ar(bus:outBus, channelsArray:sig)
   }).add;
 
+  ~vcoOut = Bus.audio(server:s, numChannels:1);
   SynthDef(\vco, {
-    arg freq, mul, gate, ccAttack, ccDecay, ccSustain, ccRelease, lfoBus;
+    arg freq, mul, lfoBus, outBus;
+
+    var lfo = In.ar(bus:lfoBus, numChannels:1);
+
+    var sig = SinOsc.ar(freq:freq, phase:0.0, mul:mul, add:0.0);
+
+    sig = sig;
+    sig = Limiter.ar(in:sig, level:1.0);
+    Out.ar(outBus, sig);
+  }).add;
+
+  ~vcaOut = Bus.audio(server:s, numChannels:1);
+  SynthDef(\vca, {
+    arg ccAttack, ccDecay, ccSustain, ccRelease, gate, inBus, outBus;
+
+    var in = In.ar(bus:inBus, numChannels:1);
 
     var attack = ccAttack.linlin(inMin:0, inMax:127, outMin:0.0, outMax:4.0);
     var decay = ccDecay.linlin(inMin:0, inMax:127, outMin:0.0, outMax:4.0);
     var sustain = ccSustain.linlin(inMin:0, inMax:127, outMin:0.0, outMax:1.0);
     var release = ccRelease.linlin(inMin:0, inMax:127, outMin:0.0, outMax:4.0);
 
-    var sig = SinOsc.ar(freq:freq, phase:0.0, mul:mul, add:0.0);
     var env = Env.adsr(
       attackTime:attack,
       decayTime:decay,
@@ -102,10 +112,23 @@
       releaseTime:release,
     ).kr(doneAction: 0, gate:gate);
 
-    sig = sig * env;
-    sig = sig ! 2;
-    Out.ar(0, sig);
-  }).add
+    var sig = in * env;
+    sig = Limiter.ar(in:sig, level:1.0);
+    Out.ar(outBus, sig)
+  }).add;
+
+  SynthDef(\vcf, {
+    arg ccFilterFreq, ccFilterRq, inBus, outBus;
+
+    var in = In.ar(bus:inBus, numChannels:1);
+
+    var filterFreq = ccFilterFreq.linexp(inMin:0, inMax:127, outMin:20.0, outMax:15000.0);
+    var filterRq = ccFilterRq.linlin(inMin:0, inMax:127, outMin:0.01, outMax:1.0);
+
+    var sig = RLPF.ar(in:in, freq:filterFreq, rq:filterRq, mul:1.0, add:0.0);
+    sig = Limiter.ar(in:sig, level:1.0);
+    Out.ar(outBus, sig)
+  }).add;
 )
 
 (
@@ -116,26 +139,44 @@
       \ccFreq, ~ccLfoFreq.asMap,
       \ccMul, ~ccLfoMul.asMap,
       \ccShape, ~ccLfoShape.asMap,
-      \ccFilterFreq, ~ccFilterFreq.asMap,
-      \ccFilterRq, ~ccFilterRq.asMap,
       \outBus, ~lfoOut,
     ]
   );
-)
 
-(
   ~vco = Synth.tail(
     aGroup:s,
     defName:\vco,
     args:[
       \freq, ~vcoFreq.asMap,
       \mul, ~vcoMul.asMap,
-      \gate, ~vcoGate.asMap,
+      \lfoBus, ~lfoOut,
+      \outBus, ~vcoOut,
+    ]
+  );
+
+  ~vca = Synth.tail(
+    aGroup:s,
+    defName:\vca,
+    args:[
       \ccAttack, ~ccAttack.asMap,
       \ccDecay, ~ccDecay.asMap,
       \ccSustain, ~ccSustain.asMap,
       \ccRelease, ~ccRelease.asMap,
+      \gate, ~vcaGate.asMap,
       \lfoBus, ~lfoOut,
+      \inBus, ~vcoOut,
+      \outBus, ~vcaOut,
+    ]
+  );
+
+  ~vcf = Synth.tail(
+    aGroup:s,
+    defName:\vcf,
+    args:[
+      \ccFilterFreq, ~ccFilterFreq.asMap,
+      \ccFilterRq, ~ccFilterRq.asMap,
+      \inBus, ~vcaOut,
+      \outBus, 0,
     ]
   );
 )
