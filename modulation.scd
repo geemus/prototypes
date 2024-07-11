@@ -23,8 +23,13 @@
   ~ccLfoFreq = Bus.newFrom(bus:~cc, offset:21, numChannels:1); ~ccLfoFreq.set(24);
   ~ccLfoMul = Bus.newFrom(bus:~cc, offset:22, numChannels:1); ~ccLfoMul.set(16);
 
-  ~ccfilterFreq = Bus.newFrom(bus:~cc, offset:23, numChannels:1); ~ccFilterFreq.set(20);
-  ~ccfilterRq = Bus.newFrom(bus:~cc, offset:27, numChannels:1); ~ccFilterRq.set(64);
+  ~ccAttack = Bus.newFrom(bus:~cc, offset:28, numChannels:1); ~ccAttack.set(4);
+  ~ccDecay = Bus.newFrom(bus:~cc, offset:29, numChannels:1); ~ccDecay.set(8);
+  ~ccSustain = Bus.newFrom(bus:~cc, offset:30, numChannels:1); ~ccSustain.set(16);
+  ~ccRelease = Bus.newFrom(bus:~cc, offset:31, numChannels:1); ~ccRelease.set(128);
+
+  ~ccFilterFreq = Bus.newFrom(bus:~cc, offset:23, numChannels:1); ~ccFilterFreq.set(20);
+  ~ccFilterRq = Bus.newFrom(bus:~cc, offset:27, numChannels:1); ~ccFilterRq.set(64);
 
   ~vcoFreq = Bus.control(server:s, numChannels:1); ~vcoFreq.set(440.0);
   ~vcoMul = Bus.control(server:s, numChannels:1); ~vcoMul.set(0.25);
@@ -82,15 +87,21 @@
   }).add;
 
   SynthDef(\vco, {
-    arg freq, mul, attack, decay, sustain, release, gate;
-    var env, sig;
-    sig = SinOsc.ar(freq:freq, phase:0.0, mul:mul, add:0.0);
-    env = Env.adsr(
-      attackTime:0.01,
-      decayTime:0.3,
-      sustainLevel:0.5,
-      releaseTime:1.0,
+    arg freq, mul, gate, ccAttack, ccDecay, ccSustain, ccRelease, lfoBus;
+
+    var attack = ccAttack.linlin(inMin:0, inMax:127, outMin:0.0, outMax:4.0);
+    var decay = ccDecay.linlin(inMin:0, inMax:127, outMin:0.0, outMax:4.0);
+    var sustain = ccSustain.linlin(inMin:0, inMax:127, outMin:0.0, outMax:1.0);
+    var release = ccRelease.linlin(inMin:0, inMax:127, outMin:0.0, outMax:4.0);
+
+    var sig = SinOsc.ar(freq:freq, phase:0.0, mul:mul, add:0.0);
+    var env = Env.adsr(
+      attackTime:attack,
+      decayTime:decay,
+      sustainLevel:sustain,
+      releaseTime:release,
     ).kr(doneAction: 0, gate:gate);
+
     sig = sig * env;
     sig = sig ! 2;
     Out.ar(0, sig);
@@ -120,6 +131,11 @@
       \freq, ~vcoFreq.asMap,
       \mul, ~vcoMul.asMap,
       \gate, ~vcoGate.asMap,
+      \ccAttack, ~ccAttack.asMap,
+      \ccDecay, ~ccDecay.asMap,
+      \ccSustain, ~ccSustain.asMap,
+      \ccRelease, ~ccRelease.asMap,
+      \lfoBus, ~lfoOut,
     ]
   );
 )
