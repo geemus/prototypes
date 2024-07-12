@@ -85,6 +85,7 @@
 
   Ndef.new(key:\vco, object:{
     var sig = SinOsc.ar(freq:\freq.kr(440.0), phase:0.0, mul:\mul.kr(0.5), add:0.0);
+    sig = sig * 10.dbamp;
     sig = Limiter.ar(in:sig, level:1.0);
   }).map(
     \freq, ~vcoFreq.asMap,
@@ -93,10 +94,10 @@
 
   Ndef.new(key:\vca, object:{
     var env = Env.adsr(
-      attackTime:\ccAttack.kr(4).linlin(inMin:0, inMax:127, outMin:0, outMax:8.0),
-      decayTime:\ccDecay.kr(8).linlin(inMin:0, inMax:127, outMin:0, outMax:8.0),
+      attackTime:\ccAttack.kr(4).linlin(inMin:0, inMax:127, outMin:0, outMax:4.0),
+      decayTime:\ccDecay.kr(8).linlin(inMin:0, inMax:127, outMin:0, outMax:4.0),
       sustainLevel:\ccSustain.kr(16).linlin(inMin:0, inMax:127, outMin:0, outMax:1.0),
-      releaseTime:\ccRelease.kr(128).linlin(inMin:0, inMax:127, outMin:0.2, outMax:8.0),
+      releaseTime:\ccRelease.kr(128).linlin(inMin:0, inMax:127, outMin:0.2, outMax:4.0),
     ).kr(doneAction: Done.pauseSelf(), gate:\noteGate.kr(0));
 
     var sig = \in.ar(0) * env;
