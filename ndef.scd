@@ -1,8 +1,6 @@
 (
   s.waitForBoot({
     s.sync;
-    MIDIClient.init;
-    s.sync;
     MIDIIn.connectAll(verbose:true);
   });
 )
@@ -30,7 +28,7 @@
   ~ccSustain = Bus.newFrom(bus:~cc, offset:30, numChannels:1); ~ccSustain.set(16);
   ~ccRelease = Bus.newFrom(bus:~cc, offset:31, numChannels:1); ~ccRelease.set(128);
 
-  ~ccFilterFreq = Bus.newFrom(bus:~cc, offset:23, numChannels:1); ~ccFilterFreq.set(20);
+  ~ccFilterFreq = Bus.newFrom(bus:~cc, offset:23, numChannels:1); ~ccFilterFreq.set(127);
   ~ccFilterRq = Bus.newFrom(bus:~cc, offset:27, numChannels:1); ~ccFilterRq.set(64);
 
   ~vcoFreq = Bus.control(server:s, numChannels:1); ~vcoFreq.set(440.0);
@@ -98,7 +96,7 @@
       decayTime:\ccDecay.kr(8).linlin(inMin:0, inMax:127, outMin:0, outMax:4.0),
       sustainLevel:\ccSustain.kr(16).linlin(inMin:0, inMax:127, outMin:0, outMax:1.0),
       releaseTime:\ccRelease.kr(128).linlin(inMin:0, inMax:127, outMin:0.2, outMax:4.0),
-    ).kr(doneAction: Done.pauseSelf(), gate:\noteGate.kr(0));
+    ).kr(doneAction: Done.freeSelf(), gate:\noteGate.kr(0));
 
     var sig = \in.ar(0) * env;
     Limiter.ar(in:sig, level:1.0);
