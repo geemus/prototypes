@@ -77,6 +77,7 @@
     ]);
 
     sig = Limiter.ar(in:sig, level:0.3);
+    sig;
   }).map(
     \ccFreq, ~ccLfoFreq.asMap,
     \ccMul, ~ccLfoMul.asMap,
@@ -85,7 +86,8 @@
 
   Ndef.new(key:\vco, object:{
     var sig = SinOsc.ar(freq:\freq.kr(440.0), phase:0.0, mul:\mul.kr(0.5), add:0.0);
-    sig = Limiter.ar(in:sig, level:1.0);
+    sig = Limiter.ar(in:sig, level:0.3);
+    sig;
   }).map(
     \freq, ~vcoFreq.asMap,
     \mul, ~vcoMul.asMap,
@@ -100,7 +102,8 @@
     ).kr(doneAction: Done.freeSelf(), gate:\noteGate.kr(0));
 
     var sig = \in.ar(0) * env;
-    Limiter.ar(in:sig, level:1.0);
+    sig = Limiter.ar(in:sig, level:0.3);
+    sig;
   }).map(
     \ccAttack, ~ccAttack.asMap,
     \ccDecay, ~ccDecay.asMap,
@@ -112,9 +115,11 @@
   Ndef.new(key:\vcf, object:{
     var filterFreq = \ccFilterFreq.kr(20).linexp(inMin:0, inMax:127, outMin:20.0, outMax:15000.0);
     var filterRq = \ccFilterRq.kr(64).linlin(inMin:0, inMax:127, outMin:0.01, outMax:1.0);
+    var sig;
 
-    var sig = RLPF.ar(in:\in.ar(0), freq:filterFreq, rq:filterRq, mul:1.0, add:0.0);
-    sig = Limiter.ar(in:sig, level:1.0);
+    sig = RLPF.ar(in:\in.ar(0), freq:filterFreq, rq:filterRq, mul:1.0, add:0.0);
+    sig = Limiter.ar(in:sig, level:0.3);
+    sig;
   }).map(
     \ccFilterFreq, ~ccFilterFreq.asMap,
     \ccFilterRq, ~ccFilterRq.asMap,
@@ -122,7 +127,9 @@
 
   Ndef.new(key:\vca, object:{
     var amp = \ccVcaAmp.kr(64).linlin(inMin:0, inMax:127, outMin:0, outMax:20);
-    \in.ar(0) * amp.dbamp;
+    var sig = \in.ar(0) * amp.dbamp;
+    sig = Limiter.ar(in:sig, level:1.0);
+    sig;
   }).map(
     \ccVcaAmp, ~ccVcaAmp.asMap,
   );
