@@ -31,9 +31,11 @@
   ~ccFilterFreq = Bus.newFrom(bus:~cc, offset:23, numChannels:1); ~ccFilterFreq.set(127);
   ~ccFilterRq = Bus.newFrom(bus:~cc, offset:27, numChannels:1); ~ccFilterRq.set(64);
 
+  ~ccVcaAmp = Bus.newFrom(bus:~cc, offset:24, numChannels:1); ~ccVcaAmp.set(64);
+
   ~vcoFreq = Bus.control(server:s, numChannels:1); ~vcoFreq.set(440.0);
   ~vcoMul = Bus.control(server:s, numChannels:1); ~vcoMul.set(0.25);
-  ~vcaGate = Bus.control(server:s, numChannels:1); ~vcaGate.set(0);
+  ~envGate = Bus.control(server:s, numChannels:1); ~envGate.set(0);
   MIDIdef.noteOn(
     key:\keysNoteOn,
     func: {
@@ -44,7 +46,7 @@
       //"keysNoteOn - freq:%, mul:%, gate:%".format(freq, mul, gate).postln;
       ~vcoFreq.set(freq);
       ~vcoMul.set(mul);
-      ~vcaGate.set(gate);
+      ~envGate.set(gate);
     },
     chan: 0,
   ).permanent_(true);
@@ -53,12 +55,12 @@
     func: {
       |val, num, chan, src|
       var freq = num.midicps;
-      var mul = val.linexp(0, 127, 0.01, 0.25);
+      var mul = val.linlin(0, 127, 0.01, 0.25);
       var gate = 0;
       //"keysNoteOff - freq:%, mul:%, gate:%".format(freq, mul, gate).postln;
       ~vcoFreq.set(freq);
       ~vcoMul.set(mul);
-      ~vcaGate.set(gate);
+      ~envGate.set(gate);
     },
     chan: 0,
   ).permanent_(true);
@@ -83,14 +85,13 @@
 
   Ndef.new(key:\vco, object:{
     var sig = SinOsc.ar(freq:\freq.kr(440.0), phase:0.0, mul:\mul.kr(0.5), add:0.0);
-    sig = sig * 10.dbamp;
     sig = Limiter.ar(in:sig, level:1.0);
   }).map(
     \freq, ~vcoFreq.asMap,
     \mul, ~vcoMul.asMap,
   );
 
-  Ndef.new(key:\vca, object:{
+  Ndef.new(key:\env, object:{
     var env = Env.adsr(
       attackTime:\ccAttack.kr(4).linlin(inMin:0, inMax:127, outMin:0, outMax:4.0),
       decayTime:\ccDecay.kr(8).linlin(inMin:0, inMax:127, outMin:0, outMax:4.0),
@@ -105,7 +106,7 @@
     \ccDecay, ~ccDecay.asMap,
     \ccSustain, ~ccSustain.asMap,
     \ccRelease, ~ccRelease.asMap,
-    \noteGate, ~vcaGate.asMap,
+    \noteGate, ~envGate.asMap,
   );
 
   Ndef.new(key:\vcf, object:{
@@ -118,6 +119,13 @@
     \ccFilterFreq, ~ccFilterFreq.asMap,
     \ccFilterRq, ~ccFilterRq.asMap,
   );
+
+  Ndef.new(key:\vca, object:{
+    var amp = \ccVcaAmp.kr(64).linlin(inMin:0, inMax:127, outMin:0, outMax:20);
+    \in.ar(0) * amp.dbamp;
+  }).map(
+    \ccVcaAmp, ~ccVcaAmp.asMap,
+  );
 )
 Ndef(\lfo).play;
 Ndef(\lfo).stop(1.0);
@@ -125,16 +133,19 @@ Ndef(\lfo).stop(1.0);
 Ndef(\vco).play;
 Ndef(\vco).stop(1.0);
 
-Ndef(\vco) <>>.in Ndef(\vca); Ndef(\vca).play;
-Ndef(\vca).stop(1.0);
+Ndef(\vco) <>>.in Ndef(\env); Ndef(\env).play;
+Ndef(\env).stop(1.0);
 
 Ndef(\vco) <>>.in Ndef(\vcf); Ndef(\vcf).play;
-Ndef(\vco) <>>.in Ndef(\vca) <>>.in Ndef(\vcf); Ndef(\vcf).play;
-Ndef(\vcf).stop(1.0);
+Ndef(\vco) <>>.in Ndef(\env) <>>.in Ndef(\vcf) <>>.in Ndef(\vca); Ndef(\vca).play;
+Ndef(\vca).stop(1.0);
+
+Ndef(\vco) <>>.in Ndef(\vcf) <>>.in Ndef(\vca); Ndef(\vca).play;
+Ndef(\vca).stop(1.0);
 
 Ndef(\lfo).scope;
 Ndef(\vco).scope;
-Ndef(\vca).scope;
+Ndef(\env).scope;
 Ndef(\vcf).scope;
 
 NdefMixer(s);
@@ -144,7 +155,3 @@ FreqScope.new;
 s.scope;
 
 ~lfoOut.scope;
-
-~lfo.free
-
-~vco.free
