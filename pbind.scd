@@ -1,0 +1,59 @@
+(
+  s.waitForBoot({
+    s.sync;
+    StageLimiter.activate;
+
+    SynthDef.new(\sine, {
+      arg freq=440, atk=0.005, rel=0.3, amp=1, pan=0;
+      var sig, env;
+      sig = SinOsc.ar(freq);
+      env = EnvGen.kr(Env.new([0,1,0],[atk,rel],[1,-1]),doneAction:2);
+      sig = Pan2.ar(sig, pan, amp);
+      sig = sig * env;
+      Out.ar(0, sig);
+    }).add;
+    SynthDef.new(\square, {
+      arg freq=440, atk=0.005, rel=0.3, amp=1, pan=0;
+      var sig, env;
+      //sig = SinOsc.ar(freq);
+      sig = LFPulse.ar(freq:freq);
+      env = EnvGen.kr(Env.new([0,1,0],[atk,rel],[1,-1]),doneAction:2);
+      sig = Pan2.ar(sig, pan, amp);
+      sig = sig * env;
+      Out.ar(0, sig);
+    }).add;
+
+    Pdef.new(\high,
+      Pbind(
+        \instrument, \sine,
+        \dur, Pseq([1/8, 1/16, 1/16, 1/4], inf),
+        \midinote, Pxrand([60, 60, 63, 65, 72], inf),
+        \stretch, 1.875,
+      )
+    );
+    Pdef.new(\low,
+      Pbind(
+        \instrument, \square,
+        \dur, Pseq([1/6, 1/12, 1/12, 1/3], inf),
+        \midinote, Pxrand([48, 48, 51, 53, 36], inf),
+        \stretch, 1.875,
+      )
+    );
+  });
+)
+
+Ndef.new(\high, Pdef(\high));
+Ndef(\high).clear;
+
+Ndef.new(\low, Pdef(\low));
+Ndef(\low).clear;
+
+(
+  Ndef.new(\ppar,
+    Ppar([
+      Pdef(\high),
+      Pdef(\low)
+    ])
+  );
+)
+Ndef(\ppar).clear;

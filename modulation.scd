@@ -185,6 +185,8 @@
 
 FreqScope.new;
 
+NdefMixer.new(s);
+
 s.scope;
 
 ~lfoOut.scope;

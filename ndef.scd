@@ -2,6 +2,7 @@
   s.waitForBoot({
     s.sync;
     MIDIIn.connectAll(verbose:true);
+    StageLimiter.activate;
   });
 )
 
@@ -138,6 +139,7 @@ Ndef(\lfo).play;
 Ndef(\lfo).stop(1.0);
 
 Ndef(\vco).play;
+Ndef(\vco).play(vol: 0.1);
 Ndef(\vco).stop(1.0);
 
 Ndef(\vco) <>>.in Ndef(\env); Ndef(\env).play;
@@ -155,7 +157,9 @@ Ndef(\vco).scope;
 Ndef(\env).scope;
 Ndef(\vcf).scope;
 
+Ndef(\vcf).gui;
 NdefMixer(s);
+s.plotTree;
 
 FreqScope.new;
 
