@@ -39,6 +39,32 @@
         \stretch, 1.875,
       )
     );
+
+    Pdef.new(\rests4,
+      Pbind(
+        \instrument, \sine,
+        \dur, Pseq([
+          1/8, Rest(1/8), Rest(1/8), 1/8,
+          Rest(1/8), 1/8, Rest(1/8), 1/8,
+          1/8, 1/8, 1/8, 1/8
+        ], inf),
+        \midinote, Prand([60, 63, 65, 72], inf),
+        \stretch, 1.875,
+      )
+    );
+    Pdef.new(\rests3,
+      Pbind(
+        \instrument, \square,
+        \dur, Pseq([
+          1/6, 1/6, Rest(1/6),
+          Rest(1/6), 1/6, 1/6,
+          1/6, 1/6, 1/6,
+          Rest(1/6), 1/6, 1/6,
+        ], inf),
+        \midinote, Prand([48, 51, 53, 36], inf),
+        \stretch, 1.875,
+      )
+    );
   });
 )
 
@@ -47,6 +73,12 @@ Ndef(\high).clear;
 
 Ndef.new(\low, Pdef(\low));
 Ndef(\low).clear;
+
+Ndef.new(\rests4, Pdef(\rests4));
+Ndef(\rests4).clear;
+
+Ndef.new(\rests3, Pdef(\rests3));
+Ndef(\rests3).clear;
 
 (
   Ndef.new(\ppar,
@@ -57,3 +89,13 @@ Ndef(\low).clear;
   );
 )
 Ndef(\ppar).clear;
+
+(
+  Ndef.new(\ppar_rests,
+    Ppar([
+      Pdef(\rests4),
+      Pdef(\rests3)
+    ])
+  );
+)
+Ndef(\ppar_rests).clear;
