@@ -23,6 +23,32 @@
       Out.ar(0, sig);
     }).add;
 
+    // stretch = 60 (seconds per minute) / beats per minute * beats per bar
+    // stretch = 60 (seconds per minute) / beats per minute * beats per bar / subdivision
+
+    Pdef.new(\subs_high,
+      Pbind(
+        \instrument, \sine,
+        \dur, Pseq(
+          [
+            Pseq([1, 2, 2], 3),
+            Pseq([Rest(5)], 1),
+          ],
+          inf),
+        \midinote, Pxrand([60, 60, 63, 65, 72], inf),
+        \stretch, 0.1171875,
+      )
+    );
+    Pdef.new(\subs_low,
+      Pbind(
+        \instrument, \square,
+        \dur, Pseq([2, Rest(6)], inf),
+        \midinote, Pxrand([48, 48, 51, 53, 36], inf),
+        \stretch, 0.1171875,
+      )
+    );
+
+
     Pdef.new(\high,
       Pbind(
         \instrument, \sine,
@@ -68,6 +94,12 @@
   });
 )
 
+Ndef.new(\subs_high, Pdef(\subs_high));
+Ndef(\subs_high).clear;
+
+Ndef.new(\subs_low, Pdef(\subs_low));
+Ndef(\subs_low).clear;
+
 Ndef.new(\high, Pdef(\high));
 Ndef(\high).clear;
 
@@ -79,6 +111,16 @@ Ndef(\rests4).clear;
 
 Ndef.new(\rests3, Pdef(\rests3));
 Ndef(\rests3).clear;
+
+(
+  Ndef.new(\ppar_subs,
+    Ppar([
+      Pdef(\subs_high),
+      Pdef(\subs_low)
+    ])
+  );
+)
+Ndef(\ppar_subs).clear;
 
 (
   Ndef.new(\ppar,
