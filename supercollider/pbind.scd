@@ -48,7 +48,6 @@
       )
     );
 
-
     Pdef.new(\high,
       Pbind(
         \instrument, \sine,
